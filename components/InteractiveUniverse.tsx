@@ -42,7 +42,7 @@ function Starfield() {
 
 function Rings() {
   const ref = useRef<THREE.Group>(null);
-  
+
   useFrame((state, delta) => {
     if (ref.current) {
       ref.current.rotation.y += delta * 0.05;
