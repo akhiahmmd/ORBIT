@@ -69,12 +69,12 @@ export default function OrbitHero() {
               <div className="absolute inset-0 -z-10 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             </button>
 
-            <button className="group flex items-center gap-3 text-[14px] text-white/60 hover:text-white/95 transition-colors w-fit font-light">
+            <a href="#how-it-works" className="group flex items-center gap-3 text-[14px] text-white/60 hover:text-white/95 transition-colors w-fit font-light cursor-pointer">
               <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/5 group-hover:border-white/50 group-hover:bg-white/10 transition-all">
                 <div className="ml-0.5 w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent" />
               </div>
               Explore how it works
-            </button>
+            </a>
           </motion.div>
         </div>
       </div>
