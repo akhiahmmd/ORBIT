@@ -92,8 +92,18 @@ function EventStar({
         onPointerOut={(e) => { e.stopPropagation(); onUnhover(); }}
         onClick={(e) => { e.stopPropagation(); onClick(); }}
       >
-        <sphereGeometry args={[0.055, 12, 12]} />
-        <meshBasicMaterial color={active ? new THREE.Color(1, 1, 1) : color} transparent opacity={0.9} />
+        <sphereGeometry args={[0.045, 16, 16]} />
+        <meshBasicMaterial color={active ? new THREE.Color(1, 1, 1) : color} transparent opacity={0.95} />
+      </mesh>
+
+      {/* Cinematic concentric rings for interactive feel */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.08, 0.085, 32]} />
+        <meshBasicMaterial color={color} transparent opacity={active ? 0.8 : 0.15} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.12, 0.123, 32]} />
+        <meshBasicMaterial color={color} transparent opacity={active ? 0.3 : 0.05} side={THREE.DoubleSide} />
       </mesh>
 
       {/* Hover tooltip — compact, projected into space */}
@@ -108,13 +118,13 @@ function EventStar({
               <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: `#${color.getHexString()}` }} />
               <div className="text-[9px] font-mono text-white/50 tracking-widest uppercase">{data.date}</div>
             </div>
-            <div className="text-white/95 text-[13px] font-medium mb-1.5 tracking-wide">{data.topic}</div>
-            <div className="flex items-center gap-2 text-[10px] text-white/40 mb-3">
-              <span>Mood: <span className="text-white/75">{data.mood}</span></span>
+            <div className="text-white/95 text-[14px] font-serif mb-1.5 tracking-wide">{data.topic}</div>
+            <div className="flex items-center gap-3 text-[10px] text-white/50 mb-3 font-sans">
+              <span>Mood: <span className="text-white/80">{data.mood}</span></span>
               <span>·</span>
-              <span>Productivity: <span className="text-white/75">{data.productivity}</span></span>
+              <span>Productivity: <span className="text-white/80">{data.productivity}</span></span>
             </div>
-            <p className="text-[11px] text-white/60 leading-relaxed font-serif italic border-l border-white/10 pl-2">
+            <p className="text-[11.5px] text-white/70 leading-relaxed font-serif italic border-l border-white/15 pl-3">
               "{data.journal}"
             </p>
           </div>
@@ -176,9 +186,9 @@ export default function DataStars({
         return (
           <group key={cluster.name} position={[x, 1.5, z]}>
             <Html distanceFactor={15} center zIndexRange={[50, 0]} style={{ pointerEvents: 'none' }}>
-              <div className="flex flex-col items-center gap-1 opacity-80 mix-blend-screen transition-opacity duration-500">
-                <span className="text-white/90 text-[14px] font-medium tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{cluster.name}</span>
-                <span className="text-white/40 text-[9px] tracking-wider uppercase font-mono">{eventCount} events</span>
+              <div className="flex flex-col items-center gap-1 opacity-90 mix-blend-plus-lighter transition-opacity duration-700">
+                <span className="text-white/95 text-[15px] font-light tracking-[0.05em] drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">{cluster.name}</span>
+                <span className="text-white/50 text-[9px] tracking-[0.2em] uppercase font-mono">{eventCount} events</span>
               </div>
             </Html>
             {/* Subtle glow behind label */}

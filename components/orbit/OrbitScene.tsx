@@ -28,7 +28,7 @@ export default function OrbitScene() {
       >
         <Suspense fallback={null}>
           {/* Atmosphere */}
-          <fog attach="fog" args={['#02030a', 42, 180]} />
+          <fog attach="fog" args={['#010204', 35, 150]} />
           <ambientLight intensity={0.02} />
 
           {/* Background stars */}

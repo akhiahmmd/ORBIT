@@ -24,9 +24,9 @@ export default function InsightPanel({
           transition={{ duration: 0.4, ease: 'easeOut' }}
           className="absolute right-6 lg:right-10 top-1/2 -translate-y-1/2 z-40 pointer-events-auto w-[300px]"
         >
-          <div className="bg-[#070914]/88 backdrop-blur-2xl border border-white/[0.1] rounded-sm shadow-[0_18px_60px_rgba(0,0,0,0.72)] overflow-hidden">
+          <div className="bg-[#05060b]/40 backdrop-blur-3xl border border-white/10 rounded-[4px] shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden">
             {/* Top accent */}
-            <div className="h-px bg-gradient-to-r from-transparent via-indigo-200/70 to-transparent" />
+            <div className="h-[2px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
 
             <div className="p-6">
               {/* Date */}
@@ -36,12 +36,12 @@ export default function InsightPanel({
               </div>
 
               {/* Topic */}
-              <h3 className="text-white text-lg font-semibold tracking-tight mb-1">
+              <h3 className="text-white text-xl font-serif tracking-tight mb-1">
                 {star.topic}
               </h3>
 
               {/* Cluster tag */}
-              <div className="text-indigo-200/55 text-xs font-mono tracking-wide mb-5">
+              <div className="text-white/50 text-xs font-sans tracking-[0.1em] uppercase mb-6">
                 {star.cluster}
               </div>
 
@@ -58,7 +58,7 @@ export default function InsightPanel({
               </div>
 
               {/* Journal */}
-              <p className="text-white/35 text-[13px] leading-relaxed italic">
+              <p className="text-white/60 text-[13.5px] leading-[1.8] font-light">
                 &ldquo;{star.journal}&rdquo;
               </p>
 
