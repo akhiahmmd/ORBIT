@@ -1,11 +1,13 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
 
 import JournalDemo from './JournalDemo';
 import AnalysisDemo from './AnalysisDemo';
 import MemoryFormation from './MemoryFormation';
-import MiniOrbit from './MiniOrbit';
+
+const MiniOrbit = dynamic(() => import('./MiniOrbit'), { ssr: false });
 
 type Step = 'journal' | 'analysis' | 'memory' | 'orbit' | 'pattern';
 
@@ -15,11 +17,11 @@ export default function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="relative w-full overflow-hidden bg-[#010204]"
+      className="relative w-full overflow-hidden bg-[#010204] flex flex-col"
       style={{ minHeight: '100svh' }}
     >
       {/* ── Section Intro ────────────────────────────────────────────── */}
-      <div className="absolute inset-x-0 top-0 z-20 flex flex-col items-center pt-14 md:pt-20 px-6 text-center pointer-events-none">
+      <div className="relative z-20 flex flex-col items-center pt-24 pb-8 px-6 text-center pointer-events-none flex-shrink-0">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -65,14 +67,14 @@ export default function HowItWorks() {
       </div>
 
       {/* ── Main Interactive Area ────────────────────────────────────── */}
-      <div className="relative w-full max-w-[1400px] mx-auto px-6 md:px-12 h-full min-h-[100svh] flex items-center justify-center pt-48 md:pt-0">
+      <div className="relative w-full max-w-[1400px] mx-auto px-6 md:px-12 flex-1 flex items-center justify-center pb-24">
         
         <AnimatePresence mode="wait">
           {step !== 'orbit' && step !== 'pattern' ? (
             <motion.div 
               key="flow"
-              exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
-              transition={{ duration: 0.6 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
               className="w-full flex flex-col md:flex-row items-center justify-center gap-12 md:gap-8"
             >
               {/* LEFT: Journal */}

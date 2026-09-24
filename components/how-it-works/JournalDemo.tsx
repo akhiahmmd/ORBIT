@@ -12,7 +12,7 @@ export default function JournalDemo({ onAnalyze, isAnalyzed }: JournalDemoProps)
       initial={{ opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.8, delay: 0.3 }}
+      transition={{ duration: 0.4 }}
       className="w-full max-w-[280px] flex flex-col gap-6"
     >
       {/* Journal Entry Card */}

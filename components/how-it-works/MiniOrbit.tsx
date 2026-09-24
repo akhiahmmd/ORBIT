@@ -60,23 +60,23 @@ export default function MiniOrbit({ onExploreFull }: MiniOrbitProps) {
       <div className="absolute inset-0 pointer-events-none">
         
         {/* Subtle Hint Controls */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-6">
-          <span className="font-mono text-[9px] tracking-widest text-white/30 uppercase">Drag to explore</span>
-          <span className="w-1 h-1 rounded-full bg-white/10" />
-          <span className="font-mono text-[9px] tracking-widest text-white/30 uppercase">Scroll to zoom</span>
-          <span className="w-1 h-1 rounded-full bg-white/10" />
-          <span className="font-mono text-[9px] tracking-widest text-white/30 uppercase">Click a memory</span>
+        <div className="absolute top-4 md:top-6 left-1/2 -translate-x-1/2 flex items-center gap-4 md:gap-6 whitespace-nowrap bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          <span className="font-mono text-[8px] md:text-[9px] tracking-widest text-white/50 uppercase">Drag to explore</span>
+          <span className="w-1 h-1 rounded-full bg-white/20" />
+          <span className="font-mono text-[8px] md:text-[9px] tracking-widest text-white/50 uppercase">Hover a memory</span>
+          <span className="w-1 h-1 rounded-full bg-white/20 hidden md:inline-block" />
+          <span className="font-mono text-[8px] md:text-[9px] tracking-widest text-white/50 uppercase hidden md:inline-block">Select a pattern</span>
         </div>
 
         <AnimatePresence>
           {/* Star Hover / Click Panel */}
           {((hoveredId && hoverType === 'star' && !clickedId) || (clickedId && clickType === 'star')) && (
             <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 5, scale: 0.95 }}
+              initial={{ opacity: 0, y: 10, x: -10 }}
+              animate={{ opacity: 1, y: 0, x: 0 }}
+              exit={{ opacity: 0, y: 5, x: -10 }}
               transition={{ duration: 0.2 }}
-              className="absolute left-6 top-6 w-[220px] rounded-xl overflow-hidden pointer-events-auto"
+              className="absolute left-4 top-20 md:left-6 md:top-6 w-[calc(100%-2rem)] max-w-[260px] rounded-2xl overflow-hidden pointer-events-auto"
               style={{
                 background: 'rgba(6,8,18,0.85)',
                 backdropFilter: 'blur(20px)',
@@ -113,11 +113,11 @@ export default function MiniOrbit({ onExploreFull }: MiniOrbitProps) {
           {/* Cluster Hover / Click Panel */}
           {((hoveredId && hoverType === 'cluster' && !clickedId) || (clickedId && clickType === 'cluster')) && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 5 }}
+              initial={{ opacity: 0, y: 10, x: 10 }}
+              animate={{ opacity: 1, y: 0, x: 0 }}
+              exit={{ opacity: 0, y: 5, x: 10 }}
               transition={{ duration: 0.2 }}
-              className="absolute right-6 top-6 w-[200px] rounded-xl overflow-hidden pointer-events-auto"
+              className="absolute right-4 top-20 md:right-6 md:top-6 w-[calc(100%-2rem)] max-w-[240px] rounded-2xl overflow-hidden pointer-events-auto"
               style={{
                 background: 'rgba(6,8,18,0.85)',
                 backdropFilter: 'blur(20px)',
@@ -152,12 +152,12 @@ export default function MiniOrbit({ onExploreFull }: MiniOrbitProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
           className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 text-center pointer-events-auto"
         >
           <p className="font-serif italic" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>
-            One memory is a moment.<br/>
-            Hundreds of memories reveal patterns.
+            One moment is a memory.<br/>
+            Memories reveal patterns.
           </p>
           
           <button

@@ -28,7 +28,7 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
             key={i}
             initial={{ opacity: 1, x: pos.x, y: pos.y, scale: 1 }}
             animate={{ opacity: 0, x: 0, y: 0, scale: 0.1 }}
-            transition={{ duration: 0.8, delay: pos.delay, ease: 'backIn' }}
+            transition={{ duration: 0.4, delay: pos.delay, ease: 'backIn' }}
             className="absolute px-3 py-1.5 rounded-full"
             style={{
               background: 'rgba(255,255,255,0.06)',
@@ -41,7 +41,7 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.2, delay: 0.7, type: 'spring', bounce: 0.4 }}
+          transition={{ duration: 0.6, delay: 0.3, type: 'spring', bounce: 0.4 }}
           className="relative flex items-center justify-center"
         >
           {/* Outer glow */}
@@ -96,7 +96,7 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 1.2 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
         className="flex flex-col items-center gap-5 text-center"
       >
         <div className="flex flex-col items-center gap-1">

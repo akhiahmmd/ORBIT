@@ -75,8 +75,8 @@ export default function MiniOrbitScene({ hoveredId, clickedId, onHover, onClick 
   
   // Background particles
   const particles = useMemo(() => {
-    const positions = new Float32Array(300 * 3);
-    for (let i = 0; i < 300; i++) {
+    const positions = new Float32Array(150 * 3);
+    for (let i = 0; i < 150; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 20;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
@@ -130,7 +130,7 @@ export default function MiniOrbitScene({ hoveredId, clickedId, onHover, onClick 
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={300}
+            count={150}
             array={particles}
             itemSize={3}
           />

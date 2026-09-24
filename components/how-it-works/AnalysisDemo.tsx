@@ -6,10 +6,10 @@ interface AnalysisDemoProps {
 }
 
 const LABELS = [
-  { text: 'PYTHON', delay: 0.1 },
-  { text: 'LEARNING', delay: 0.2 },
-  { text: 'HAPPY', delay: 0.3 },
-  { text: 'PRODUCTIVE', delay: 0.4 },
+  { text: 'PYTHON', delay: 0.05 },
+  { text: 'LEARNING', delay: 0.1 },
+  { text: 'HAPPY', delay: 0.15 },
+  { text: 'PRODUCTIVE', delay: 0.2 },
 ];
 
 export default function AnalysisDemo({ onCreateMemory }: AnalysisDemoProps) {
@@ -17,8 +17,8 @@ export default function AnalysisDemo({ onCreateMemory }: AnalysisDemoProps) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
-      transition={{ duration: 0.5 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.3 }}
       className="flex flex-col items-center justify-center gap-10 w-full max-w-[400px]"
     >
       {/* Semantic Labels Container */}
@@ -42,7 +42,7 @@ export default function AnalysisDemo({ onCreateMemory }: AnalysisDemoProps) {
               initial={{ opacity: 0, scale: 0.8, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{
-                duration: 0.6,
+                duration: 0.4,
                 delay: label.delay,
                 type: 'spring',
                 bounce: 0.3
@@ -69,7 +69,7 @@ export default function AnalysisDemo({ onCreateMemory }: AnalysisDemoProps) {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
         className="flex flex-col items-center gap-5 text-center"
       >
         <p 
