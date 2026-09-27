@@ -17,7 +17,7 @@ export default function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="relative w-full overflow-hidden bg-[#010204] flex flex-col"
+      className="relative w-full overflow-hidden bg-transparent flex flex-col"
       style={{ minHeight: '100svh' }}
     >
       {/* ── Section Intro ────────────────────────────────────────────── */}

@@ -99,7 +99,7 @@ function UniverseScene({ selection, setSelection, activeTab, onInteract }: Unive
       <OrbitControls ref={controlsRef} enablePan={false} minDistance={2} maxDistance={15} enableDamping />
       <points>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" count={400} array={particles} itemSize={3} />
+          <bufferAttribute attach="attributes-position" count={400} args={[particles, 3]} itemSize={3} />
         </bufferGeometry>
         <pointsMaterial size={0.03} color="#ffffff" transparent opacity={0.15} sizeAttenuation />
       </points>
