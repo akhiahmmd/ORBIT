@@ -13,12 +13,12 @@ interface UniverseViewProps {
 }
 
 const CLUSTERS = [
-  { id: 'study', name: 'STUDY', color: '#4488ff', position: [-2, 0, -2] },
-  { id: 'productivity', name: 'PRODUCTIVITY', color: '#ff8844', position: [2, -1, 1] },
-  { id: 'stress', name: 'STRESS', color: '#ff4466', position: [-1, 2, 2] },
-  { id: 'goals', name: 'GOALS', color: '#aa44ff', position: [1.5, 1, -1.5] },
-  { id: 'reflection', name: 'REFLECTION', color: '#44ccaa', position: [0, -2, -1] },
-  { id: 'social', name: 'SOCIAL', color: '#ffcc44', position: [3, 1, 0] },
+  { id: 'study', name: 'STUDY', color: '#4488ff', position: [-5, 0, -5] },
+  { id: 'productivity', name: 'PRODUCTIVITY', color: '#ff8844', position: [6, -2, 3] },
+  { id: 'stress', name: 'STRESS', color: '#ff4466', position: [-3, 5, 5] },
+  { id: 'goals', name: 'GOALS', color: '#aa44ff', position: [4, 3, -4] },
+  { id: 'reflection', name: 'REFLECTION', color: '#44ccaa', position: [0, -5, -3] },
+  { id: 'social', name: 'SOCIAL', color: '#ffcc44', position: [7, 2, 0] },
 ];
 
 export default function UniverseView({ selection, setSelection, activeTab = 'universe', onInteract }: UniverseViewProps) {
@@ -41,7 +41,7 @@ function UniverseScene({ selection, setSelection, activeTab, onInteract }: Unive
     CLUSTERS.forEach(cluster => {
       const numStars = 6 + Math.floor(Math.random() * 6);
       for (let i = 0; i < numStars; i++) {
-        const radius = 0.8 + Math.random() * 1.5;
+        const radius = 1.5 + Math.random() * 2.5;
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.acos(2 * Math.random() - 1);
         const x = cluster.position[0] + radius * Math.sin(phi) * Math.cos(theta);
@@ -96,7 +96,7 @@ function UniverseScene({ selection, setSelection, activeTab, onInteract }: Unive
 
   return (
     <>
-      <OrbitControls ref={controlsRef} enablePan={false} minDistance={2} maxDistance={15} enableDamping />
+      <OrbitControls ref={controlsRef} enablePan={false} enableZoom={false} minDistance={2} maxDistance={25} enableDamping />
       <points>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" count={400} args={[particles, 3]} itemSize={3} />

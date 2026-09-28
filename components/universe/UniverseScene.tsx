@@ -14,18 +14,18 @@ interface UniverseSceneProps {
   onMemoryHover: (memoryId: string | null) => void;
 }
 
-// Pre-generate background particles outside component to maintain purity
-const bgStars1 = new Float32Array(500 * 3);
-const bgStars2 = new Float32Array(300 * 3);
-for (let i = 0; i < 500; i++) {
-  bgStars1[i * 3] = (Math.random() - 0.5) * 40;
-  bgStars1[i * 3 + 1] = (Math.random() - 0.5) * 40;
-  bgStars1[i * 3 + 2] = (Math.random() - 0.5) * 40;
+// Deep space background particles
+const bgStars1 = new Float32Array(800 * 3);
+const bgStars2 = new Float32Array(500 * 3);
+for (let i = 0; i < 800; i++) {
+  bgStars1[i * 3] = (Math.random() - 0.5) * 60;
+  bgStars1[i * 3 + 1] = (Math.random() - 0.5) * 60;
+  bgStars1[i * 3 + 2] = (Math.random() - 0.5) * 60;
 }
-for (let i = 0; i < 300; i++) {
-  bgStars2[i * 3] = (Math.random() - 0.5) * 60;
-  bgStars2[i * 3 + 1] = (Math.random() - 0.5) * 60;
-  bgStars2[i * 3 + 2] = (Math.random() - 0.5) * 60;
+for (let i = 0; i < 500; i++) {
+  bgStars2[i * 3] = (Math.random() - 0.5) * 80;
+  bgStars2[i * 3 + 1] = (Math.random() - 0.5) * 80;
+  bgStars2[i * 3 + 2] = (Math.random() - 0.5) * 80;
 }
 
 export default function UniverseScene({
@@ -41,8 +41,6 @@ export default function UniverseScene({
   // Generate constellation lines (connect within clusters)
   const connections = useMemo(() => {
     const lines: [THREE.Vector3, THREE.Vector3][] = [];
-    
-    // Group memories by clusterId
     const clusters: Record<string, MemoryEntry[]> = {};
     memories.forEach(m => {
       if (m.clusterId) {
@@ -51,15 +49,13 @@ export default function UniverseScene({
       }
     });
 
-    // Connect nodes within each cluster
     Object.values(clusters).forEach(clusterMemories => {
       if (clusterMemories.length < 2) return;
       for (let i = 0; i < clusterMemories.length; i++) {
         for (let j = i + 1; j < clusterMemories.length; j++) {
           const v1 = new THREE.Vector3(...clusterMemories[i].position);
           const v2 = new THREE.Vector3(...clusterMemories[j].position);
-          // Only connect if they are reasonably close to prevent cross-galaxy lines
-          if (v1.distanceTo(v2) < 4) {
+          if (v1.distanceTo(v2) < 5) {
             lines.push([v1, v2]);
           }
         }
@@ -68,26 +64,25 @@ export default function UniverseScene({
     return lines;
   }, [memories]);
 
-  // Subtle whole-galaxy rotation and camera follow
+  // Gentle auto-rotation and camera follow
   useFrame((state, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.02; // Very slow rotation
+      groupRef.current.rotation.y += delta * 0.03; 
+      groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.05;
     }
 
     if (activeMemoryId && controlsRef.current) {
       const targetMem = memories.find((m) => m.id === activeMemoryId);
       if (targetMem) {
-        // Need to account for the group's rotation to find the true world position of the target memory
         const localPos = new THREE.Vector3(...targetMem.position);
         const worldPos = localPos.applyMatrix4(groupRef.current!.matrixWorld);
         controlsRef.current.target.lerp(worldPos, 0.05);
         controlsRef.current.update();
       }
     } else {
-      // Gentle auto-rotation of camera when nothing is focused
       if (controlsRef.current) {
         controlsRef.current.autoRotate = true;
-        controlsRef.current.autoRotateSpeed = 0.5;
+        controlsRef.current.autoRotateSpeed = 0.3;
         controlsRef.current.update();
       }
     }
@@ -95,60 +90,63 @@ export default function UniverseScene({
 
   return (
     <>
+      <color attach="background" args={['#030712']} />
+      
       <OrbitControls
         ref={controlsRef}
         enablePan={false}
         enableZoom={false}
-        minDistance={3}
+        minDistance={4}
         maxDistance={25}
         enableDamping
         dampingFactor={0.05}
       />
       
-      <ambientLight intensity={0.2} />
+      <ambientLight intensity={0.3} />
       
-      {/* Deep space starfield (Drei utility for high quality stars) */}
-      <Stars radius={50} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
+      <Stars radius={60} depth={60} count={3000} factor={4} saturation={0.5} fade speed={1.5} />
 
-      {/* Additional layered dust/particles */}
       <points>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[bgStars1, 3]} count={500} itemSize={3} />
+          <bufferAttribute attach="attributes-position" args={[bgStars1, 3]} count={800} itemSize={3} />
         </bufferGeometry>
-        <pointsMaterial size={0.05} color="#88aaff" transparent opacity={0.3} sizeAttenuation />
+        <pointsMaterial size={0.06} color="#6366f1" transparent opacity={0.2} sizeAttenuation />
       </points>
       <points>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[bgStars2, 3]} count={300} itemSize={3} />
+          <bufferAttribute attach="attributes-position" args={[bgStars2, 3]} count={500} itemSize={3} />
         </bufferGeometry>
-        <pointsMaterial size={0.08} color="#aaaaff" transparent opacity={0.15} sizeAttenuation />
+        <pointsMaterial size={0.09} color="#22d3ee" transparent opacity={0.1} sizeAttenuation />
       </points>
 
-      {/* Main Galaxy Group */}
       <group ref={groupRef}>
-        
-        {/* Constellation Lines */}
         {connections.map(([start, end], idx) => (
           <Line
             key={`line-${idx}`}
             points={[start, end]}
-            color="#aabbee"
-            lineWidth={1}
+            color="#4f46e5"
+            lineWidth={1.2}
             transparent
-            opacity={0.2}
+            opacity={0.3}
           />
         ))}
 
-        {/* Memories / Memory Nodes */}
         {memories.map((mem) => {
           const isActive = activeMemoryId === mem.id;
           const isHovered = hoveredMemoryId === mem.id;
-          const scale = isActive ? 1.8 : (isHovered ? 1.4 : 1);
-          const opacity = isActive || isHovered ? 1 : 0.7;
+          const isFocused = isActive || isHovered;
+          
+          // Different base colors depending on mood just for variety
+          const starColor = mem.mood === 'Joyful' ? '#fde047' : 
+                            mem.mood === 'Focused' ? '#22d3ee' : 
+                            mem.mood === 'Calm' ? '#6ee7b7' : 
+                            mem.mood === 'Anxious' ? '#f87171' : '#818cf8';
+                            
+          const scale = isActive ? 2.2 : (isHovered ? 1.8 : 1.2);
+          const opacity = isFocused ? 1 : 0.8;
           
           return (
             <group key={mem.id} position={mem.position}>
-              {/* Core Star */}
               <mesh
                 scale={scale}
                 onPointerOver={(e) => {
@@ -166,42 +164,49 @@ export default function UniverseScene({
                   onMemoryClick(mem);
                 }}
               >
-                <sphereGeometry args={[0.08, 32, 32]} />
+                <sphereGeometry args={[0.07, 32, 32]} />
                 <meshBasicMaterial color="#ffffff" transparent opacity={opacity} />
               </mesh>
               
-              {/* Outer Glow 1 */}
-              <mesh scale={scale * 3}>
-                <sphereGeometry args={[0.08, 32, 32]} />
+              <mesh scale={scale * 2.5}>
+                <sphereGeometry args={[0.07, 32, 32]} />
                 <meshBasicMaterial
-                  color="#88bbff"
+                  color={starColor}
                   transparent
-                  opacity={isActive ? 0.5 : (isHovered ? 0.3 : 0.15)}
+                  opacity={isActive ? 0.6 : (isHovered ? 0.4 : 0.2)}
                   blending={THREE.AdditiveBlending}
                   depthWrite={false}
                 />
               </mesh>
 
-              {/* Outer Glow 2 (Larger, softer) */}
-              <mesh scale={scale * 6}>
-                <sphereGeometry args={[0.08, 32, 32]} />
+              <mesh scale={scale * 5}>
+                <sphereGeometry args={[0.07, 32, 32]} />
                 <meshBasicMaterial
-                  color="#4466ff"
+                  color={starColor}
                   transparent
-                  opacity={isActive ? 0.2 : 0.05}
+                  opacity={isActive ? 0.25 : 0.08}
                   blending={THREE.AdditiveBlending}
                   depthWrite={false}
                 />
               </mesh>
               
-              {/* Label */}
-              {(isActive || isHovered) && (
-                <Html center distanceFactor={12} zIndexRange={[100, 0]}>
+              {/* Contextual Hover Label Anchored to Star */}
+              {isHovered && !isActive && (
+                <Html distanceFactor={10} zIndexRange={[100, 0]}>
                   <div 
-                    className="mt-8 font-mono text-[11px] tracking-[0.2em] text-white/90 whitespace-nowrap px-3 py-1.5 bg-black/60 backdrop-blur-md rounded border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all"
-                    style={{ pointerEvents: 'none' }}
+                    className="absolute -translate-y-1/2 ml-4 bg-[#0a0c10]/95 backdrop-blur-xl border border-[#1e293b] rounded-lg p-3 shadow-2xl flex flex-col gap-1 min-w-[140px] pointer-events-none transform transition-all duration-300 animate-in fade-in zoom-in-95"
                   >
-                    {mem.date}
+                    <span className="font-mono text-[9px] tracking-widest text-indigo-400 uppercase">
+                      {mem.date}
+                    </span>
+                    <span className="font-serif text-[13px] text-slate-200 leading-tight">
+                      {mem.title}
+                    </span>
+                    <div className="flex gap-1 mt-1">
+                      <span className="text-[9px] font-mono tracking-wider text-slate-400 border border-slate-700/50 rounded px-1.5 py-0.5">
+                        {mem.mood}
+                      </span>
+                    </div>
                   </div>
                 </Html>
               )}
@@ -210,13 +215,12 @@ export default function UniverseScene({
         })}
       </group>
 
-      {/* Post-processing Bloom for cinematic glowing stars */}
       <EffectComposer>
         <Bloom 
-          luminanceThreshold={0.5} 
+          luminanceThreshold={0.4} 
           mipmapBlur 
-          intensity={1.2} 
-          radius={0.6}
+          intensity={1.5} 
+          radius={0.8}
         />
       </EffectComposer>
     </>

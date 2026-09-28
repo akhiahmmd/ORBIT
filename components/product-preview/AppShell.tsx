@@ -24,7 +24,7 @@ export default function AppShell() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 1, delay: 0.3 }}
-      className="relative w-full h-[600px] md:h-[700px] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+      className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#060810]"
     >
       {/* Permanent Background Universe */}
       <div className="absolute inset-0 z-0">
@@ -103,7 +103,7 @@ export default function AppShell() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.4 }}
-              className="pointer-events-auto absolute md:relative bottom-4 md:bottom-auto right-4 md:right-0 w-[calc(100%-2rem)] md:w-[280px] flex-shrink-0 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl md:rounded-none md:border-l md:border-t-0 md:border-b-0 md:border-r-0 p-6 flex flex-col h-[260px] md:h-full z-20 m-4 md:m-0"
+              className="pointer-events-auto absolute md:relative bottom-4 md:bottom-auto right-4 md:right-0 w-[calc(100%-2rem)] md:w-[280px] flex-shrink-0 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl md:rounded-none md:border-l md:border-t-0 md:border-b-0 md:border-r-0 p-6 flex flex-col z-20 m-4 md:m-0 h-auto md:h-full max-h-[40%]"
             >
               {selection.id ? (
                 <SelectionDetail selection={selection} />

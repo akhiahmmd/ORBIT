@@ -4,9 +4,9 @@ import AppShell from './AppShell';
 
 export default function ProductPreview() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#010204] py-24 md:py-32 min-h-[100svh] flex flex-col items-center">
+    <section className="relative w-full h-[100dvh] overflow-hidden bg-[#010204] pt-12 pb-8 flex flex-col items-center">
       {/* ── Section Intro ────────────────────────────────────────────── */}
-      <div className="z-20 flex flex-col items-center px-6 text-center mb-12 md:mb-16 max-w-2xl mx-auto">
+      <div className="flex-shrink-0 z-20 flex flex-col items-center px-6 text-center mb-6 max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -52,7 +52,7 @@ export default function ProductPreview() {
       </div>
 
       {/* ── App Interface ────────────────────────────────────────────── */}
-      <div className="w-full max-w-[1400px] px-4 md:px-8 z-10 flex-1 flex flex-col">
+      <div className="w-full max-w-[1400px] px-4 md:px-8 z-10 flex-1 min-h-0 flex flex-col">
         <AppShell />
       </div>
       

@@ -1,17 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function JournalView({ onStarClick }: { onStarClick: (id: string) => void }) {
   const [entry, setEntry] = useState('');
-  
-  const entries = [
-    { date: 'AUG 15', text: "Finally understood Python today. Everything clicked.", active: true },
-    { date: 'AUG 14', text: "Worked on my portfolio for two hours. Feeling productive." },
-    { date: 'AUG 12', text: "Exam stress was high. Need to take a break." },
-  ];
+  const [mood, setMood] = useState('Focused');
+  const [entries, setEntries] = useState([
+    { date: 'AUG 15', text: "Finally understood Python today. Everything clicked.", active: true, mood: 'Joyful' },
+    { date: 'AUG 14', text: "Worked on my portfolio for two hours. Feeling productive.", mood: 'Focused' },
+    { date: 'AUG 12', text: "Exam stress was high. Need to take a break.", mood: 'Anxious' },
+  ]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('orbit_journal_entries');
+    if (saved) {
+      try { setEntries(JSON.parse(saved)); } catch (e) {}
+    }
+  }, []);
+
+  const handleRecord = () => {
+    if (!entry.trim()) return;
+    const newEntry = {
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase(),
+      text: entry.trim(),
+      active: true,
+      mood: mood
+    };
+    const updated = [newEntry, ...entries];
+    setEntries(updated);
+    setEntry('');
+    localStorage.setItem('orbit_journal_entries', JSON.stringify(updated));
+  };
 
   return (
-    <div className="w-full flex flex-col gap-10">
+    <div className="w-full flex flex-col gap-6 relative z-10 pointer-events-auto">
       <div className="flex justify-between items-end">
         <h2 className="font-serif text-2xl text-white/90 tracking-wide">Journal</h2>
         <span className="font-mono text-[10px] tracking-[0.2em] text-white/30 uppercase">31 Days Active</span>
@@ -22,20 +43,36 @@ export function JournalView({ onStarClick }: { onStarClick: (id: string) => void
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50" />
         <textarea
            placeholder="What patterns did you notice today?"
-           className="w-full bg-transparent text-white/90 p-6 font-serif text-lg leading-relaxed resize-none outline-none placeholder:text-white/20 min-h-[140px]"
+           className="w-full bg-transparent text-white/90 p-5 font-serif text-[15px] leading-relaxed resize-none outline-none placeholder:text-white/20 min-h-[100px]"
            value={entry}
            onChange={(e) => setEntry(e.target.value)}
         />
         <div className="flex justify-between items-center px-4 py-3 border-t border-white/5 bg-white/[0.02]">
            <div className="flex gap-2">
              <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 text-white/40 hover:text-white transition-all text-sm">+</button>
+             <select 
+               value={mood} 
+               onChange={(e) => setMood(e.target.value)}
+               className="bg-transparent border border-white/10 text-white/60 text-[11px] font-mono tracking-widest uppercase rounded px-2 py-1 outline-none appearance-none hover:bg-white/5 cursor-pointer"
+             >
+               <option value="Joyful" className="bg-[#030408]">Joyful</option>
+               <option value="Focused" className="bg-[#030408]">Focused</option>
+               <option value="Calm" className="bg-[#030408]">Calm</option>
+               <option value="Reflective" className="bg-[#030408]">Reflective</option>
+               <option value="Anxious" className="bg-[#030408]">Anxious</option>
+             </select>
            </div>
-           <button className="px-5 py-2 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500 hover:text-white border border-indigo-500/30 text-[10px] font-mono tracking-widest uppercase rounded-full shadow-[0_0_15px_rgba(99,102,241,0.2)] hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] transition-all">Record Moment</button>
+           <button 
+             onClick={handleRecord}
+             className="px-5 py-2 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500 hover:text-white border border-indigo-500/30 text-[10px] font-mono tracking-widest uppercase rounded-full shadow-[0_0_15px_rgba(99,102,241,0.2)] hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] transition-all"
+           >
+             Record Moment
+           </button>
         </div>
       </div>
       
       {/* Timeline */}
-      <div className="relative border-l border-white/10 ml-4 pl-8 space-y-12 before:absolute before:top-0 before:bottom-0 before:-left-[1px] before:w-[2px] before:bg-gradient-to-b before:from-indigo-500/50 before:to-transparent">
+      <div className="relative border-l border-white/10 ml-4 pl-6 space-y-6 before:absolute before:top-0 before:bottom-0 before:-left-[1px] before:w-[2px] before:bg-gradient-to-b before:from-indigo-500/50 before:to-transparent">
         {entries.map((entryItem, idx) => (
           <motion.div 
             key={idx}
@@ -45,7 +82,9 @@ export function JournalView({ onStarClick }: { onStarClick: (id: string) => void
             className="relative group"
           >
             <div className={`absolute -left-[37px] top-1.5 w-[11px] h-[11px] rounded-full border-2 border-[#090b14] transition-all duration-500 ${entryItem.active ? 'bg-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.8)] scale-110' : 'bg-white/20 group-hover:bg-white/40'}`} />
-            <div className="font-mono text-[10px] tracking-widest uppercase text-white/40 mb-2">{entryItem.date}</div>
+            <div className="font-mono text-[10px] tracking-widest uppercase text-white/40 mb-2">
+              {entryItem.date} {entryItem.mood && <span className="ml-2 text-indigo-400/70">• {entryItem.mood}</span>}
+            </div>
             <div className="font-serif text-[15px] text-white/80 leading-relaxed mb-3 italic">
               "{entryItem.text}"
             </div>
@@ -68,7 +107,7 @@ export function JournalView({ onStarClick }: { onStarClick: (id: string) => void
 export function InsightsView() {
   return (
     <div className="w-full">
-      <h2 className="font-serif text-2xl text-white/90 mb-8 tracking-wide">Pattern Discovery</h2>
+      <h2 className="font-serif text-xl text-white/90 mb-5 tracking-wide">Pattern Discovery</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <InsightCard 
@@ -109,7 +148,7 @@ function InsightCard({ title, value, desc, visual, fullWidth }: any) {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`p-6 rounded-2xl bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/[0.08] flex flex-col gap-5 hover:border-white/[0.15] hover:from-white/[0.05] hover:to-white/[0.02] transition-all duration-500 group ${fullWidth ? 'md:col-span-2' : ''}`}
+      className={`p-5 rounded-2xl bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/[0.08] flex flex-col gap-3 hover:border-white/[0.15] hover:from-white/[0.05] hover:to-white/[0.02] transition-all duration-500 group ${fullWidth ? 'md:col-span-2' : ''}`}
     >
       <div className="flex justify-between items-start">
         <div>
@@ -134,9 +173,9 @@ export function GoalsView() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <h2 className="font-serif text-2xl text-white/90 mb-10 tracking-wide text-center">Trajectories</h2>
+      <h2 className="font-serif text-xl text-white/90 mb-6 tracking-wide text-center">Trajectories</h2>
       
-      <div className="relative w-full max-w-[320px] aspect-square flex items-center justify-center mb-10">
+      <div className="relative w-full max-w-[240px] aspect-square flex items-center justify-center mb-6">
          {/* Orbital Rings */}
          <svg className="w-full h-full -rotate-90 drop-shadow-[0_0_30px_rgba(255,255,255,0.05)]" viewBox="0 0 200 200">
            {goals.map((goal, idx) => (
