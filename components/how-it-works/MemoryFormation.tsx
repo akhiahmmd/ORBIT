@@ -31,8 +31,8 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
             transition={{ duration: 0.4, delay: pos.delay, ease: 'backIn' }}
             className="absolute px-3 py-1.5 rounded-full"
             style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
+              background: '#141824',
+              border: '1px solid #2e3650',
             }}
           />
         ))}
@@ -49,7 +49,7 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
             className="absolute rounded-full pointer-events-none"
             style={{
               width: '100px', height: '100px',
-              background: 'radial-gradient(circle, rgba(255,245,210,0.15) 0%, rgba(255,220,130,0.05) 40%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(129, 140, 248, 0.15) 0%, rgba(129, 140, 248, 0.05) 40%, transparent 70%)',
               filter: 'blur(8px)',
             }}
           />
@@ -58,14 +58,14 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
           <div className="absolute rounded-full"
             style={{
               width: '44px', height: '44px',
-              border: '1px solid rgba(255,235,160,0.25)',
-              boxShadow: '0 0 20px rgba(255,220,100,0.15)',
+              border: '1px solid rgba(129, 140, 248, 0.25)',
+              boxShadow: '0 0 20px rgba(129, 140, 248, 0.15)',
             }}
           />
           <div className="absolute rounded-full"
             style={{
               width: '24px', height: '24px',
-              border: '1px solid rgba(255,245,210,0.4)',
+              border: '1px solid rgba(129, 140, 248, 0.4)',
             }}
           />
           
@@ -73,7 +73,7 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
           <div className="relative z-10 rounded-full bg-white"
             style={{
               width: '8px', height: '8px',
-              boxShadow: '0 0 20px rgba(255,250,230,1), 0 0 40px rgba(255,220,130,0.6)',
+              boxShadow: '0 0 20px rgba(165, 180, 252, 1), 0 0 40px rgba(129, 140, 248, 0.6)',
             }}
           />
 
@@ -84,7 +84,7 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
               className="absolute"
               style={{
                 width: '24px', height: '1px',
-                background: 'linear-gradient(to right, transparent, rgba(255,245,210,0.6), transparent)',
+                background: 'linear-gradient(to right, transparent, rgba(165, 180, 252, 0.6), transparent)',
                 transform: `rotate(${angle}deg)`,
               }}
             />
@@ -101,60 +101,36 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
       >
         <div className="flex flex-col items-center gap-1">
           <span 
-            className="font-mono text-[9px] tracking-[0.25em] uppercase"
-            style={{ color: 'rgba(255,235,160,0.7)' }}
+            className="font-mono text-[10px] tracking-widest uppercase text-indigo-300/70"
           >
             AUG 15, 2026
           </span>
           <span 
-            className="font-serif text-[13px]"
-            style={{ color: 'rgba(255,255,255,0.9)', letterSpacing: '-0.01em' }}
+            className="font-serif text-[14px] text-slate-300"
           >
             PYTHON / LEARNING
           </span>
         </div>
 
         <p 
-          className="font-serif italic"
-          style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)' }}
+          className="font-serif text-[13px] text-slate-400 italic"
         >
           One moment became a memory.
         </p>
 
         <button
           onClick={onViewOrbit}
-          className="group relative flex items-center justify-center gap-2 px-6 py-2.5 rounded-full overflow-hidden transition-all duration-300 mt-2"
-          style={{
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.15)',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.12)';
-            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.3)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)';
-            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.15)';
-          }}
+          className="mt-2 group w-[220px] py-3 rounded-lg flex items-center justify-center gap-2 bg-[#141824] hover:bg-[#1a1f30] border border-[#2e3650] hover:border-indigo-500/50 transition-all duration-300 active:scale-[0.98]"
         >
-          <span 
-            className="font-mono tracking-[0.1em] text-[10px] uppercase font-medium relative z-10 transition-colors"
-            style={{ color: 'rgba(255,255,255,0.9)' }}
-          >
+          <span className="font-mono tracking-widest text-[11px] uppercase font-medium text-indigo-200 group-hover:text-indigo-100 transition-colors">
             View in ORBIT
           </span>
           <svg 
             width="12" height="12" viewBox="0 0 12 12" fill="none" 
-            className="relative z-10 transition-transform duration-300 group-hover:translate-x-1"
-            style={{ color: 'rgba(255,255,255,0.9)' }}
+            className="transition-transform duration-300 group-hover:translate-x-1 text-indigo-300 group-hover:text-indigo-200"
           >
             <path d="M2.5 6H9.5M9.5 6L6 2.5M9.5 6L6 9.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          
-          <div 
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-            style={{ background: 'radial-gradient(circle at center, rgba(140,165,255,0.15) 0%, transparent 70%)' }}
-          />
         </button>
       </motion.div>
     </motion.div>

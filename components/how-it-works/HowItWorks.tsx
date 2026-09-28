@@ -110,7 +110,12 @@ export default function HowItWorks() {
               key="miniorbit"
               className="w-full max-w-[1000px] z-10"
             >
-              <MiniOrbit onExploreFull={() => console.log('Navigate to full app')} />
+              <MiniOrbit onExploreFull={() => {
+                const universeSection = document.getElementById('universe');
+                if (universeSection) {
+                  universeSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }} />
             </motion.div>
           )}
         </AnimatePresence>
