@@ -1,5 +1,6 @@
 'use client';
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useRef } from 'react';
+import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import Galaxy from './Galaxy';
@@ -16,10 +17,11 @@ import type { EventStarData } from './DataStars';
  */
 export default function OrbitScene() {
   const [selectedStar, setSelectedStar] = useState<EventStarData | null>(null);
+  const targetPosRef = useRef<THREE.Vector3 | null>(null);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
-    <div className="relative w-full h-full">
+    <div className="absolute inset-0 w-full h-full">
       <Canvas
         camera={{ position: [0, 7, 33], fov: 52, near: 0.1, far: 500 }}
         gl={{ antialias: true, alpha: false }}
@@ -53,10 +55,11 @@ export default function OrbitScene() {
           <DataStars
             onSelectStar={setSelectedStar}
             selectedStarId={selectedStar?.id ?? null}
+            onFocus={(vec) => { targetPosRef.current = vec; }}
           />
 
           {/* Camera controls */}
-          <SpaceCamera />
+          <SpaceCamera targetPosRef={targetPosRef} />
 
           {/* Postprocessing - Restrained but beautiful bloom */}
           <EffectComposer enableNormalPass={false} multisampling={4}>

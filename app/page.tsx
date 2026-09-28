@@ -2,6 +2,7 @@ import OrbitHero from '@/components/OrbitHero';
 import HowItWorks from '@/components/how-it-works/HowItWorks';
 import YourUniverse from '@/components/universe/YourUniverse';
 import ProductPreview from '@/components/product-preview/ProductPreview';
+import Conclusion from '@/components/Conclusion';
 import RefreshScrollReset from '@/components/RefreshScrollReset';
 
 export default function Home() {
@@ -12,6 +13,7 @@ export default function Home() {
       <HowItWorks />
       <YourUniverse />
       <ProductPreview />
+      <Conclusion />
     </div>
   );
 }

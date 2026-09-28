@@ -1,7 +1,8 @@
 'use client';
 import { useRef, useState, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
+import { Html, Line } from '@react-three/drei';
+import { motion } from 'framer-motion';
 import * as THREE from 'three';
 
 // ─── DEMO DATA ───────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ function EventStar({
   onHover,
   onUnhover,
   onClick,
+  onFocus,
   isHovered,
   isSelected,
 }: {
@@ -56,54 +58,62 @@ function EventStar({
   onHover: () => void;
   onUnhover: () => void;
   onClick: () => void;
+  onFocus: (vec: THREE.Vector3) => void;
   isHovered: boolean;
   isSelected: boolean;
 }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const active = isHovered || isSelected;
   const baseScale = active ? 1.8 : 1;
 
-  useFrame((state) => {
-    if (meshRef.current) {
-      const pulse = 1 + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.2;
-      meshRef.current.scale.setScalar(baseScale * pulse);
-    }
-    if (glowRef.current) {
-      const targetOpacity = active ? 0.6 : 0.15;
-      const mat = glowRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.1);
-      glowRef.current.scale.setScalar(active ? 2.5 : 1.2);
+  useFrame(() => {
+    if (isSelected && groupRef.current) {
+      const worldPos = new THREE.Vector3();
+      groupRef.current.getWorldPosition(worldPos);
+      onFocus(worldPos);
     }
   });
 
   return (
-    <group position={position}>
-      {/* Soft halo */}
-      <mesh ref={glowRef}>
-        <sphereGeometry args={[0.28, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.08} depthWrite={false} blending={THREE.AdditiveBlending} />
-      </mesh>
-
-      {/* Star core */}
+    <group position={position} ref={groupRef}>
+      {/* Invisible hit area for precise raycasting without massive overlap */}
       <mesh
-        ref={meshRef}
         onPointerOver={(e) => { e.stopPropagation(); onHover(); }}
         onPointerOut={(e) => { e.stopPropagation(); onUnhover(); }}
         onClick={(e) => { e.stopPropagation(); onClick(); }}
       >
-        <sphereGeometry args={[0.045, 16, 16]} />
-        <meshBasicMaterial color={active ? new THREE.Color(1, 1, 1) : color} transparent opacity={0.95} />
+        <sphereGeometry args={[0.5, 16, 16]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      {/* Cinematic concentric rings for interactive feel */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.08, 0.085, 32]} />
-        <meshBasicMaterial color={color} transparent opacity={active ? 0.8 : 0.15} side={THREE.DoubleSide} />
+      {/* Star core - significantly larger so it stands out from background galaxy */}
+      <mesh scale={baseScale}>
+        <sphereGeometry args={[0.08, 32, 32]} />
+        <meshBasicMaterial color={active ? new THREE.Color(1, 1, 1) : color} transparent opacity={active ? 1 : 0.8} />
       </mesh>
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.12, 0.123, 32]} />
-        <meshBasicMaterial color={color} transparent opacity={active ? 0.3 : 0.05} side={THREE.DoubleSide} />
+      
+      {/* Outer Glow 1 */}
+      <mesh scale={baseScale * 3}>
+        <sphereGeometry args={[0.08, 32, 32]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={active ? 0.6 : 0.25}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Outer Glow 2 (Larger, softer) */}
+      <mesh scale={baseScale * 6}>
+        <sphereGeometry args={[0.08, 32, 32]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={active ? 0.25 : 0.08}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </mesh>
 
       {/* Hover tooltip — compact, projected into space */}
@@ -113,21 +123,26 @@ function EventStar({
           zIndexRange={[100, 0]}
           style={{ pointerEvents: 'none' }}
         >
-          <div className="bg-[#050811]/90 backdrop-blur-xl border border-white/[0.12] rounded-xl px-4 py-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.8)] whitespace-nowrap -translate-x-1/2 -translate-y-[130%] min-w-[200px]">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 5 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="bg-[#050811]/95 backdrop-blur-xl border border-white/20 rounded-xl px-4 py-3.5 shadow-2xl w-[220px] -translate-x-1/2 -translate-y-[120%]"
+          >
             <div className="flex items-center gap-2 mb-2">
               <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: `#${color.getHexString()}` }} />
               <div className="text-[9px] font-mono text-white/50 tracking-widest uppercase">{data.date}</div>
             </div>
-            <div className="text-white/95 text-[14px] font-serif mb-1.5 tracking-wide">{data.topic}</div>
+            <div className="text-white text-[14px] font-serif mb-2 tracking-wide leading-tight">{data.topic}</div>
             <div className="flex items-center gap-3 text-[10px] text-white/50 mb-3 font-sans">
-              <span>Mood: <span className="text-white/80">{data.mood}</span></span>
+              <span>Mood: <span className="text-white/90">{data.mood}</span></span>
               <span>·</span>
-              <span>Productivity: <span className="text-white/80">{data.productivity}</span></span>
+              <span>Prod: <span className="text-white/90">{data.productivity}</span></span>
             </div>
-            <p className="text-[11.5px] text-white/70 leading-relaxed font-serif italic border-l border-white/15 pl-3">
+            <p className="text-[12px] text-white/75 leading-relaxed font-serif italic border-l-2 border-indigo-500/30 pl-3">
               "{data.journal}"
             </p>
-          </div>
+          </motion.div>
         </Html>
       )}
     </group>
@@ -138,23 +153,29 @@ function EventStar({
 export default function DataStars({
   onSelectStar,
   selectedStarId,
+  onFocus,
 }: {
   onSelectStar: (data: EventStarData | null) => void;
   selectedStarId: string | null;
+  onFocus: (vec: THREE.Vector3) => void;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   // Compute 3D positions for each event star within its cluster region
   const starPositions = useMemo(() => {
+    // Seeded-like placement to avoid random jumps on re-render
     const map: Record<string, [number, number, number]> = {};
-
     EVENT_STARS.forEach((star, i) => {
       const cluster = CLUSTERS_3D.find(c => c.name === star.cluster)!;
-      // Position along the spiral arm at the cluster's angle/radius
-      const baseAngle = cluster.angle + (Math.random() - 0.5) * 0.6;
-      const baseRadius = cluster.radius + (Math.random() - 0.5) * 3;
-      const height = (Math.random() - 0.5) * 1.5;
+      // Deterministic offset based on index so it's stable
+      const pseudoRandom1 = (Math.sin(i * 123.45) + 1) / 2;
+      const pseudoRandom2 = (Math.cos(i * 321.12) + 1) / 2;
+      const pseudoRandom3 = (Math.sin(i * 555.55) + 1) / 2;
+
+      const baseAngle = cluster.angle + (pseudoRandom1 - 0.5) * 0.8;
+      const baseRadius = cluster.radius + (pseudoRandom2 - 0.5) * 4;
+      const height = (pseudoRandom3 - 0.5) * 2.0;
 
       map[star.id] = [
         Math.cos(baseAngle) * baseRadius,
@@ -162,9 +183,26 @@ export default function DataStars({
         Math.sin(baseAngle) * baseRadius,
       ];
     });
-
     return map;
   }, []);
+
+  // Generate constellation lines linking stars in the same cluster
+  const connections = useMemo(() => {
+    const lines: [THREE.Vector3, THREE.Vector3][] = [];
+    CLUSTERS_3D.forEach(cluster => {
+      const clusterStars = EVENT_STARS.filter(s => s.cluster === cluster.name);
+      for (let i = 0; i < clusterStars.length; i++) {
+        for (let j = i + 1; j < clusterStars.length; j++) {
+          const v1 = new THREE.Vector3(...starPositions[clusterStars[i].id]);
+          const v2 = new THREE.Vector3(...starPositions[clusterStars[j].id]);
+          if (v1.distanceTo(v2) < 6) {
+            lines.push([v1, v2]);
+          }
+        }
+      }
+    });
+    return lines;
+  }, [starPositions]);
 
   // Rotate with galaxy
   useFrame((state, delta) => {
@@ -175,12 +213,22 @@ export default function DataStars({
 
   return (
     <group ref={groupRef}>
+      {/* Constellation Lines */}
+      {connections.map(([start, end], idx) => (
+        <Line
+          key={`line-${idx}`}
+          points={[start, end]}
+          color="#aabbee"
+          lineWidth={1.5}
+          transparent
+          opacity={0.15}
+        />
+      ))}
+
       {/* Render cluster labels */}
       {CLUSTERS_3D.map((cluster) => {
-        // Calculate the base position of the cluster
         const x = Math.cos(cluster.angle) * cluster.radius;
         const z = Math.sin(cluster.angle) * cluster.radius;
-        // Count events in this cluster
         const eventCount = EVENT_STARS.filter(s => s.cluster === cluster.name).length;
         
         return (
@@ -191,10 +239,9 @@ export default function DataStars({
                 <span className="text-white/50 text-[9px] tracking-[0.2em] uppercase font-mono">{eventCount} events</span>
               </div>
             </Html>
-            {/* Subtle glow behind label */}
             <mesh position={[0, -0.5, 0]}>
-              <sphereGeometry args={[1.5, 16, 16]} />
-              <meshBasicMaterial color={cluster.color} transparent opacity={0.03} blending={THREE.AdditiveBlending} depthWrite={false} />
+              <sphereGeometry args={[2.5, 16, 16]} />
+              <meshBasicMaterial color={cluster.color} transparent opacity={0.04} blending={THREE.AdditiveBlending} depthWrite={false} />
             </mesh>
           </group>
         );
@@ -221,6 +268,7 @@ export default function DataStars({
             onClick={() => {
               onSelectStar(selectedStarId === star.id ? null : star);
             }}
+            onFocus={onFocus}
           />
         );
       })}

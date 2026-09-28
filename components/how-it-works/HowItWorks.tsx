@@ -17,11 +17,10 @@ export default function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="relative w-full overflow-hidden bg-transparent flex flex-col"
-      style={{ minHeight: '100svh' }}
+      className="relative w-full overflow-hidden bg-transparent flex flex-col py-16 md:py-32"
     >
       {/* ── Section Intro ────────────────────────────────────────────── */}
-      <div className="relative z-20 flex flex-col items-center pt-24 pb-8 px-6 text-center pointer-events-none flex-shrink-0">
+      <div className="relative z-20 flex flex-col items-center pb-16 md:pb-24 px-6 text-center pointer-events-none flex-shrink-0">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}

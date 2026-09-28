@@ -7,7 +7,7 @@ export default function HeroNavigation() {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.1 }}
-      className="absolute top-0 left-0 w-full z-50 pointer-events-none"
+      className="w-full z-50 pointer-events-none"
     >
       <div className="max-w-[1440px] mx-auto flex items-center justify-between px-8 lg:px-16 py-8">
         {/* Logo */}

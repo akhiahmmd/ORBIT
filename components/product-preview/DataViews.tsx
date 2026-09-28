@@ -1,36 +1,60 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function JournalView({ onStarClick }: { onStarClick: (id: string) => void }) {
+  const [entry, setEntry] = useState('');
+  
   const entries = [
     { date: 'AUG 15', text: "Finally understood Python today. Everything clicked.", active: true },
     { date: 'AUG 14', text: "Worked on my portfolio for two hours. Feeling productive." },
     { date: 'AUG 12', text: "Exam stress was high. Need to take a break." },
-    { date: 'AUG 10', text: "Read a great book on design systems." },
   ];
 
   return (
-    <div className="w-full">
-      <h2 className="font-serif text-2xl text-white/90 mb-8 tracking-wide">Chronicle</h2>
-      <div className="relative border-l border-white/10 ml-3 pl-8 space-y-12 before:absolute before:top-0 before:bottom-0 before:-left-[1px] before:w-[2px] before:bg-gradient-to-b before:from-indigo-500/50 before:to-transparent">
-        {entries.map((entry, idx) => (
+    <div className="w-full flex flex-col gap-10">
+      <div className="flex justify-between items-end">
+        <h2 className="font-serif text-2xl text-white/90 tracking-wide">Journal</h2>
+        <span className="font-mono text-[10px] tracking-[0.2em] text-white/30 uppercase">31 Days Active</span>
+      </div>
+
+      {/* Input Area */}
+      <div className="rounded-2xl bg-[#030408]/80 backdrop-blur-xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] relative overflow-hidden group focus-within:border-indigo-500/40 transition-colors duration-500">
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50" />
+        <textarea
+           placeholder="What patterns did you notice today?"
+           className="w-full bg-transparent text-white/90 p-6 font-serif text-lg leading-relaxed resize-none outline-none placeholder:text-white/20 min-h-[140px]"
+           value={entry}
+           onChange={(e) => setEntry(e.target.value)}
+        />
+        <div className="flex justify-between items-center px-4 py-3 border-t border-white/5 bg-white/[0.02]">
+           <div className="flex gap-2">
+             <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 text-white/40 hover:text-white transition-all text-sm">+</button>
+           </div>
+           <button className="px-5 py-2 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500 hover:text-white border border-indigo-500/30 text-[10px] font-mono tracking-widest uppercase rounded-full shadow-[0_0_15px_rgba(99,102,241,0.2)] hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] transition-all">Record Moment</button>
+        </div>
+      </div>
+      
+      {/* Timeline */}
+      <div className="relative border-l border-white/10 ml-4 pl-8 space-y-12 before:absolute before:top-0 before:bottom-0 before:-left-[1px] before:w-[2px] before:bg-gradient-to-b before:from-indigo-500/50 before:to-transparent">
+        {entries.map((entryItem, idx) => (
           <motion.div 
             key={idx}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: idx * 0.1 }}
+            transition={{ delay: 0.2 + idx * 0.1 }}
             className="relative group"
           >
-            <div className={`absolute -left-[37px] top-1.5 w-[11px] h-[11px] rounded-full border-2 border-[#020306] transition-colors duration-500 ${entry.active ? 'bg-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.6)]' : 'bg-white/20 group-hover:bg-white/40'}`} />
-            <div className="font-mono text-[10px] tracking-widest uppercase text-white/40 mb-2">{entry.date}</div>
-            <div className="font-serif text-lg text-white/80 leading-relaxed mb-3">
-              "{entry.text}"
+            <div className={`absolute -left-[37px] top-1.5 w-[11px] h-[11px] rounded-full border-2 border-[#090b14] transition-all duration-500 ${entryItem.active ? 'bg-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.8)] scale-110' : 'bg-white/20 group-hover:bg-white/40'}`} />
+            <div className="font-mono text-[10px] tracking-widest uppercase text-white/40 mb-2">{entryItem.date}</div>
+            <div className="font-serif text-[15px] text-white/80 leading-relaxed mb-3 italic">
+              "{entryItem.text}"
             </div>
-            {entry.active && (
+            {entryItem.active && (
               <button 
                 onClick={() => onStarClick('study-star-0')}
-                className="text-xs font-mono tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-2 group/btn"
+                className="text-[11px] font-mono tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-2 group/btn mt-2 bg-indigo-500/10 px-3 py-1.5 rounded-md border border-indigo-500/20 w-fit"
               >
-                <span>View Event in Universe</span>
+                <span>View in Universe</span>
                 <span className="transform group-hover/btn:translate-x-1 transition-transform">→</span>
               </button>
             )}
@@ -102,53 +126,63 @@ function InsightCard({ title, value, desc, visual, fullWidth }: any) {
 }
 
 export function GoalsView() {
+  const goals = [
+    { title: 'Learn Python', progress: 85, color: '#818cf8', radius: 80, dashArray: 502 },
+    { title: 'Build ORBIT', progress: 65, color: '#c084fc', radius: 60, dashArray: 377 },
+    { title: 'Portfolio', progress: 40, color: '#34d399', radius: 40, dashArray: 251 },
+  ];
+
   return (
-    <div className="w-full">
-      <h2 className="font-serif text-2xl text-white/90 mb-10 tracking-wide">Active Trajectories</h2>
-      <div className="space-y-10">
-        <Goal progress={85} title="Learn Python" label="Primary Focus" color="from-indigo-400 to-blue-500" shadow="shadow-indigo-500/50" />
-        <Goal progress={65} title="Build ORBIT" label="Project" color="from-purple-400 to-pink-500" shadow="shadow-purple-500/50" />
-        <Goal progress={40} title="Complete Portfolio" label="Goal" color="from-emerald-400 to-teal-500" shadow="shadow-emerald-500/50" />
+    <div className="w-full flex flex-col items-center">
+      <h2 className="font-serif text-2xl text-white/90 mb-10 tracking-wide text-center">Trajectories</h2>
+      
+      <div className="relative w-full max-w-[320px] aspect-square flex items-center justify-center mb-10">
+         {/* Orbital Rings */}
+         <svg className="w-full h-full -rotate-90 drop-shadow-[0_0_30px_rgba(255,255,255,0.05)]" viewBox="0 0 200 200">
+           {goals.map((goal, idx) => (
+             <g key={goal.title}>
+               {/* Background Track */}
+               <circle 
+                 cx="100" cy="100" r={goal.radius} 
+                 fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6"
+               />
+               {/* Progress Fill */}
+               <motion.circle 
+                 cx="100" cy="100" r={goal.radius} 
+                 fill="none" stroke={goal.color} strokeWidth="6" strokeLinecap="round"
+                 strokeDasharray={goal.dashArray}
+                 initial={{ strokeDashoffset: goal.dashArray }}
+                 animate={{ strokeDashoffset: goal.dashArray - (goal.dashArray * goal.progress) / 100 }}
+                 transition={{ duration: 1.5, delay: idx * 0.2, ease: "easeOut" }}
+                 style={{ filter: `drop-shadow(0 0 8px ${goal.color}80)` }}
+               />
+             </g>
+           ))}
+         </svg>
+         
+         <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+           <span className="font-mono text-[10px] tracking-[0.2em] text-white/40 uppercase mb-1">Momentum</span>
+           <span className="font-serif text-4xl text-white/90">63%</span>
+         </div>
+      </div>
+
+      <div className="w-full space-y-4">
+        {goals.map((goal, idx) => (
+          <motion.div 
+            key={goal.title}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 + idx * 0.1 }}
+            className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full shadow-lg" style={{ backgroundColor: goal.color, boxShadow: `0 0 10px ${goal.color}` }} />
+              <span className="font-sans text-sm text-white/80">{goal.title}</span>
+            </div>
+            <span className="font-mono text-xs text-white/50">{goal.progress}%</span>
+          </motion.div>
+        ))}
       </div>
     </div>
-  );
-}
-
-function Goal({ progress, title, label, color, shadow }: { progress: number, title: string, label: string, color: string, shadow: string }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="relative group"
-    >
-      <div className="flex justify-between items-end mb-4">
-        <div>
-          <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-white/40 mb-1.5">{label}</div>
-          <div className="font-serif text-lg text-white/90">{title}</div>
-        </div>
-        <div className="font-mono text-xl font-light text-white/90">{progress}<span className="text-white/30 text-sm">%</span></div>
-      </div>
-      
-      {/* Track */}
-      <div className="relative w-full h-[2px] bg-white/5 rounded-full">
-        {/* Glow behind line */}
-        <motion.div
-          initial={{ width: 0, opacity: 0 }}
-          animate={{ width: `${progress}%`, opacity: 0.5 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className={`absolute top-1/2 -translate-y-1/2 h-[8px] blur-sm bg-gradient-to-r ${color}`}
-        />
-        {/* Core line */}
-        <motion.div 
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className={`relative h-full bg-gradient-to-r ${color} rounded-full`}
-        >
-          {/* Head dot */}
-          <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full ${shadow} shadow-[0_0_10px_rgba(255,255,255,0.8)]`} />
-        </motion.div>
-      </div>
-    </motion.div>
   );
 }

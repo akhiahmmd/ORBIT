@@ -14,7 +14,7 @@ export default function HeroStats() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1, delay: 1.2 }}
-      className="absolute bottom-12 left-0 w-full z-20 pointer-events-none"
+      className="w-full z-20 pointer-events-none"
     >
       <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
         <div className="flex items-center gap-12 md:gap-16">
