@@ -26,18 +26,18 @@ export const CLUSTERS_3D = [
 ];
 
 export const EVENT_STARS: EventStarData[] = [
-  { id: 'n1',  date: 'AUG 15, 2026', topic: 'Python / Learning',  cluster: 'Study',        mood: 'Happy',      productivity: '8/10', journal: 'Finally understood functions today.' },
-  { id: 'n2',  date: 'AUG 12, 2026', topic: 'React Components',   cluster: 'Study',        mood: 'Focused',    productivity: '9/10', journal: 'Built my first custom hook.' },
-  { id: 'n3',  date: 'AUG 18, 2026', topic: 'Project Deadline',   cluster: 'Productivity',  mood: 'Determined', productivity: '9/10', journal: 'Hit all milestones for the sprint.' },
-  { id: 'n4',  date: 'AUG 20, 2026', topic: 'Morning Routine',    cluster: 'Productivity',  mood: 'Calm',       productivity: '7/10', journal: 'Journaling before code improves clarity.' },
-  { id: 'n5',  date: 'AUG 10, 2026', topic: 'Career Planning',    cluster: 'Goals',         mood: 'Hopeful',    productivity: '6/10', journal: 'Mapped out the next six months.' },
-  { id: 'n6',  date: 'AUG 22, 2026', topic: 'Portfolio Update',   cluster: 'Goals',         mood: 'Motivated',  productivity: '7/10', journal: 'Redesigned my portfolio.' },
-  { id: 'n7',  date: 'AUG 14, 2026', topic: 'Evening Walk',       cluster: 'Reflection',    mood: 'Peaceful',   productivity: 'N/A',  journal: 'Walked for an hour without music.' },
-  { id: 'n8',  date: 'AUG 16, 2026', topic: 'Gratitude Log',      cluster: 'Reflection',    mood: 'Content',    productivity: 'N/A',  journal: 'Good coffee, a solved bug, sunset.' },
-  { id: 'n9',  date: 'AUG 11, 2026', topic: 'Exam Prep',          cluster: 'Stress',        mood: 'Anxious',    productivity: '5/10', journal: 'Two exams next week.' },
-  { id: 'n10', date: 'AUG 19, 2026', topic: 'Sleep Deficit',      cluster: 'Stress',        mood: 'Tired',      productivity: '4/10', journal: 'Only five hours of sleep.' },
-  { id: 'n11', date: 'AUG 17, 2026', topic: 'Dinner with Friends',cluster: 'Social',        mood: 'Joyful',     productivity: 'N/A',  journal: 'Great conversation about AI.' },
-  { id: 'n12', date: 'AUG 21, 2026', topic: 'Study Group',        cluster: 'Social',        mood: 'Energized',  productivity: '7/10', journal: 'Teaching is the best way to learn.' },
+  { id: 'n1',  date: 'Aug 15, 2026', topic: 'Python / Learning',  cluster: 'Study',        mood: 'Happy',      productivity: '8/10', journal: 'Finally understood functions today.' },
+  { id: 'n2',  date: 'Aug 12, 2026', topic: 'React Components',   cluster: 'Study',        mood: 'Productive', productivity: '9/10', journal: 'Built my first custom hook.' },
+  { id: 'n3',  date: 'Aug 18, 2026', topic: 'Project Deadline',   cluster: 'Productivity', mood: 'Productive', productivity: '9/10', journal: 'Hit all milestones for the sprint.' },
+  { id: 'n4',  date: 'Aug 20, 2026', topic: 'Morning Routine',    cluster: 'Productivity', mood: 'Calm',       productivity: '7/10', journal: 'Journaling before code improves clarity.' },
+  { id: 'n5',  date: 'Aug 10, 2026', topic: 'Career Planning',    cluster: 'Goals',        mood: 'Reflective', productivity: '6/10', journal: 'Mapped out the next six months.' },
+  { id: 'n6',  date: 'Aug 22, 2026', topic: 'Portfolio Update',   cluster: 'Goals',        mood: 'Productive', productivity: '7/10', journal: 'Redesigned my portfolio.' },
+  { id: 'n7',  date: 'Aug 14, 2026', topic: 'Evening Walk',       cluster: 'Reflection',   mood: 'Calm',       productivity: 'N/A',  journal: 'Walked for an hour without music.' },
+  { id: 'n8',  date: 'Aug 16, 2026', topic: 'Gratitude Log',      cluster: 'Reflection',   mood: 'Happy',      productivity: 'N/A',  journal: 'Good coffee, a solved bug, sunset.' },
+  { id: 'n9',  date: 'Aug 11, 2026', topic: 'Exam Prep',          cluster: 'Stress',       mood: 'Anxious',    productivity: '5/10', journal: 'Two exams next week.' },
+  { id: 'n10', date: 'Aug 19, 2026', topic: 'Sleep Deficit',      cluster: 'Stress',       mood: 'Sad',        productivity: '4/10', journal: 'Only five hours of sleep.' },
+  { id: 'n11', date: 'Aug 17, 2026', topic: 'Dinner with Friends',cluster: 'Social',       mood: 'Happy',      productivity: 'N/A',  journal: 'Great conversation about AI.' },
+  { id: 'n12', date: 'Aug 21, 2026', topic: 'Study Group',        cluster: 'Social',       mood: 'Productive', productivity: '7/10', journal: 'Teaching is the best way to learn.' },
 ];
 
 // ─── SINGLE EVENT STAR ───────────────────────────────────────────────

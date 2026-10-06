@@ -103,7 +103,7 @@ export default function MemoryFormation({ onViewOrbit }: MemoryFormationProps) {
           <span 
             className="font-mono text-[10px] tracking-widest uppercase text-indigo-300/70"
           >
-            AUG 15, 2026
+            Aug 15, 2026
           </span>
           <span 
             className="font-serif text-[14px] text-slate-300"

@@ -43,7 +43,7 @@ export default function JournalDemo({ onAnalyze, isAnalyzed }: JournalDemoProps)
 
         <div className="flex justify-between items-center mb-5">
           <span className="font-mono text-[10px] tracking-widest text-slate-500 uppercase">
-            AUG 15, 2026
+            Aug 15, 2026
           </span>
           <span className="font-mono text-[10px] tracking-widest text-indigo-400/80 uppercase">
             JOURNAL
@@ -76,7 +76,7 @@ export default function JournalDemo({ onAnalyze, isAnalyzed }: JournalDemoProps)
                 className="w-full py-3 rounded-lg flex items-center justify-center gap-2 bg-[#141824] hover:bg-[#1a1f30] border border-[#2e3650] hover:border-indigo-500/50 transition-all duration-300 group active:scale-[0.98]"
               >
                 <span className="font-mono tracking-widest text-[11px] uppercase font-medium text-indigo-200 group-hover:text-indigo-100 transition-colors">
-                  Analyze with ORBIT
+                  Analyze with ORBIT <span className="ml-2 px-1.5 py-0.5 bg-white/10 text-white/50 text-[9px] rounded font-mono">DEMO</span>
                 </span>
                 <svg 
                   width="12" height="12" viewBox="0 0 12 12" fill="none" 

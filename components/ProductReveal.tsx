@@ -104,7 +104,7 @@ export default function ProductReveal() {
           
           <div className="mb-6 mt-2">
             <div className="text-xs font-mono text-slate-500 mb-1">SELECTED DAY</div>
-            <h4 className="text-lg font-semibold text-white">August 15, 2026</h4>
+            <h4 className="text-lg font-semibold text-white">Aug 15, 2026</h4>
           </div>
 
           <div className="space-y-4 mb-8">

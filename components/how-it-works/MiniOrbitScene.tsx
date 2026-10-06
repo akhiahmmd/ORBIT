@@ -21,7 +21,7 @@ export interface StarInfo {
 
 const CLUSTERS: ClusterInfo[] = [
   { id: 'study', name: 'STUDY', color: '#4488ff', position: [-2, 0.5, -2], count: 24 },
-  { id: 'productivity', name: 'PRODUCTIVITY', color: '#ff8844', position: [2, -0.5, -1], count: 18 },
+  { id: 'productivity', name: 'PRODUCTIVITY', color: '#ff8844', position: [2, -0.5, -1], count: 2 },
   { id: 'stress', name: 'STRESS', color: '#ff4466', position: [-1, -1.5, 2], count: 12 },
   { id: 'goals', name: 'GOALS', color: '#aa44ff', position: [1.5, 1.5, 1.5], count: 8 },
   { id: 'reflection', name: 'REFLECTION', color: '#44ccaa', position: [0.5, 2, -2.5], count: 15 },

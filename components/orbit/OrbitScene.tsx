@@ -25,7 +25,7 @@ export default function OrbitScene() {
       <Canvas
         camera={{ position: [0, 7, 33], fov: 52, near: 0.1, far: 500 }}
         gl={{ antialias: true, alpha: false }}
-        style={{ background: '#010204' }}
+        style={{ background: '#010204', width: '100%', height: '100%' }}
         dpr={[1, isMobile ? 1.5 : 2]}
       >
         <Suspense fallback={null}>

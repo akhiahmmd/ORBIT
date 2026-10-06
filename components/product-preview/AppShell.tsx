@@ -1,13 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { Orbit, Compass, BookOpen, BarChart2, Target, Settings } from 'lucide-react';
-import { JournalView, InsightsView, GoalsView } from './DataViews';
+import { JournalView, InsightsView, GoalsView, ProfileView, JournalEntry } from './DataViews';
+import { EVENT_STARS } from '../orbit/DataStars';
+import { getClusterForMood, formatDate, Mood } from '../../lib/shared-constants';
 
 const UniverseView = dynamic(() => import('./UniverseView'), { ssr: false });
 
-type Tab = 'universe' | 'journal' | 'insights' | 'goals';
+type Tab = 'universe' | 'journal' | 'insights' | 'goals' | 'profile';
 
 export interface SelectionState {
   type: 'star' | 'cluster' | null;
@@ -17,6 +19,56 @@ export interface SelectionState {
 export default function AppShell() {
   const [activeTab, setActiveTab] = useState<Tab>('universe');
   const [selection, setSelection] = useState<SelectionState>({ type: null, id: null });
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('orbit_journal_entries_v2');
+    const oldSaved = localStorage.getItem('orbit_journal_entries');
+
+    if (saved) {
+      try {
+        setEntries(JSON.parse(saved));
+      } catch (e) {}
+    } else if (oldSaved) {
+      // Migrate old entries
+      try {
+        const parsed = JSON.parse(oldSaved);
+        const migrated = parsed.map((e: any, idx: number) => ({
+          id: `old-${idx}`,
+          title: '',
+          text: e.text,
+          mood: ['Happy', 'Calm', 'Productive', 'Anxious', 'Sad', 'Reflective'].includes(e.mood) ? e.mood : 'Productive',
+          date: new Date().toISOString(),
+          active: e.active
+        }));
+        setEntries(migrated);
+        localStorage.setItem('orbit_journal_entries_v2', JSON.stringify(migrated));
+      } catch (e) {}
+    } else {
+      // Load demo data
+      const demoEntries = EVENT_STARS.map(e => ({
+        id: e.id,
+        title: e.topic,
+        text: e.journal,
+        mood: e.mood as Mood,
+        date: e.date,
+        active: true
+      }));
+      setEntries(demoEntries);
+      localStorage.setItem('orbit_journal_entries_v2', JSON.stringify(demoEntries));
+    }
+  }, []);
+
+  const handleEntriesChange = (newEntries: JournalEntry[]) => {
+    setEntries(newEntries);
+    localStorage.setItem('orbit_journal_entries_v2', JSON.stringify(newEntries));
+    if (selection.type === 'star') {
+      const stillExists = newEntries.some(e => e.id === selection.id);
+      if (!stillExists) {
+        setSelection({ type: null, id: null });
+      }
+    }
+  };
 
   return (
     <motion.div
@@ -28,7 +80,7 @@ export default function AppShell() {
     >
       {/* Permanent Background Universe */}
       <div className="absolute inset-0 z-0">
-        <UniverseView selection={selection} setSelection={setSelection} activeTab={activeTab} onInteract={() => setActiveTab('universe')} />
+        <UniverseView entries={entries} selection={selection} setSelection={setSelection} activeTab={activeTab} onInteract={() => setActiveTab('universe')} />
       </div>
 
       {/* Floating UI Layer */}
@@ -48,6 +100,7 @@ export default function AppShell() {
                 { id: 'journal', label: 'Journal', icon: BookOpen },
                 { id: 'insights', label: 'Insights', icon: BarChart2 },
                 { id: 'goals', label: 'Goals', icon: Target },
+                { id: 'profile', label: 'Profile', icon: Settings },
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -68,11 +121,6 @@ export default function AppShell() {
               })}
             </nav>
           </div>
-          
-          <button className="hidden md:flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-white/30 hover:text-white/70 transition-colors">
-            <Settings size={16} />
-            <span>Settings</span>
-          </button>
         </div>
 
         {/* Center Panel Container */}
@@ -87,9 +135,10 @@ export default function AppShell() {
                 transition={{ duration: 0.4 }}
                 className="pointer-events-auto w-full max-w-2xl max-h-full overflow-y-auto custom-scrollbar bg-black/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl"
               >
-                {activeTab === 'journal' && <JournalView onStarClick={(id) => { setActiveTab('universe'); setSelection({ type: 'star', id }); }} />}
-                {activeTab === 'insights' && <InsightsView />}
+                {activeTab === 'journal' && <JournalView entries={entries} onEntriesChange={handleEntriesChange} onStarClick={(id) => { setActiveTab('universe'); setSelection({ type: 'star', id }); }} />}
+                {activeTab === 'insights' && <InsightsView entries={entries} />}
                 {activeTab === 'goals' && <GoalsView />}
+                {activeTab === 'profile' && <ProfileView />}
               </motion.div>
             )}
           </AnimatePresence>
@@ -106,7 +155,7 @@ export default function AppShell() {
               className="pointer-events-auto absolute md:relative bottom-4 md:bottom-auto right-4 md:right-0 w-[calc(100%-2rem)] md:w-[280px] flex-shrink-0 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl md:rounded-none md:border-l md:border-t-0 md:border-b-0 md:border-r-0 p-6 flex flex-col z-20 m-4 md:m-0 h-auto md:h-full max-h-[40%]"
             >
               {selection.id ? (
-                <SelectionDetail selection={selection} />
+                <SelectionDetail selection={selection} entries={entries} />
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-center text-white/30 p-4">
                   <Compass size={24} className="mb-3 opacity-50" />
@@ -122,50 +171,58 @@ export default function AppShell() {
   );
 }
 
-function SelectionDetail({ selection }: { selection: SelectionState }) {
+function SelectionDetail({ selection, entries }: { selection: SelectionState, entries: JournalEntry[] }) {
   if (selection.type === 'cluster') {
-    const isStudy = selection.id === 'study';
+    const clusterName = selection.id === 'study' ? 'STUDY / LEARNING' : selection.id.toUpperCase();
+    const clusterEntries = entries.filter(e => getClusterForMood(e.mood) === selection.id);
+    const totalMemories = clusterEntries.length;
+
     return (
       <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500">
         <div className="font-mono text-[10px] tracking-[0.2em] text-white/40 uppercase mb-2">Cluster</div>
-        <h3 className="font-serif text-xl text-white/90 mb-6">{isStudy ? 'STUDY / LEARNING' : 'PRODUCTIVITY'}</h3>
+        <h3 className="font-serif text-xl text-white/90 mb-6">{clusterName}</h3>
         
         <div className="space-y-6">
           <div>
             <div className="text-white/50 text-xs mb-1">Total Memories</div>
-            <div className="font-mono text-indigo-400 text-sm tracking-widest">{isStudy ? '24' : '18'} MOMENTS</div>
-          </div>
-          
-          <div className="h-px bg-white/5 w-full" />
-          
-          <div>
-            <div className="text-white/50 text-xs mb-1">Most Active</div>
-            <div className="font-sans text-white/90 text-sm">Wednesday</div>
-          </div>
-          
-          <div>
-            <div className="text-white/50 text-xs mb-1">Average Productivity</div>
-            <div className="font-sans text-white/90 text-sm">{isStudy ? '8.1 / 10' : '7.5 / 10'}</div>
+            <div className="font-mono text-indigo-400 text-sm tracking-widest">{totalMemories} MOMENTS</div>
           </div>
         </div>
       </div>
     );
   }
 
+  const entry = entries.find(e => e.id === selection.id);
+  
+  if (entry) {
+    const dateStr = formatDate(entry.date).toUpperCase();
+    return (
+      <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500">
+        <div className="font-mono text-[10px] tracking-[0.2em] text-white/40 uppercase mb-2">{dateStr}</div>
+        <h3 className="font-serif text-lg text-white/90 mb-4">{entry.title || 'Untitled Memory'}</h3>
+        
+        <div className="flex gap-2 mb-6">
+          <span className="px-2 py-1 rounded bg-white/5 border border-white/10 font-mono text-[9px] uppercase tracking-widest text-white/60">{entry.mood}</span>
+        </div>
+
+        <div className="h-px bg-white/5 w-full mb-6" />
+
+        <p className="font-serif italic text-white/70 text-sm leading-relaxed whitespace-pre-wrap">
+          {entry.text}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500">
-      <div className="font-mono text-[10px] tracking-[0.2em] text-white/40 uppercase mb-2">AUG 15, 2026</div>
-      <h3 className="font-serif text-lg text-white/90 mb-4">Python / Learning</h3>
+      <div className="font-mono text-[10px] tracking-[0.2em] text-white/40 uppercase mb-2">MEMORY</div>
+      <h3 className="font-serif text-lg text-white/90 mb-4">Demo Memory</h3>
       
-      <div className="flex gap-2 mb-6">
-        <span className="px-2 py-1 rounded bg-white/5 border border-white/10 font-mono text-[9px] uppercase tracking-widest text-white/60">Happy</span>
-        <span className="px-2 py-1 rounded bg-white/5 border border-white/10 font-mono text-[9px] uppercase tracking-widest text-white/60">8/10</span>
-      </div>
-
       <div className="h-px bg-white/5 w-full mb-6" />
 
       <p className="font-serif italic text-white/70 text-sm leading-relaxed">
-        "Finally understood functions today. It all makes sense now."
+        This is a demo memory. Add real entries in your Journal to see them here!
       </p>
     </div>
   );

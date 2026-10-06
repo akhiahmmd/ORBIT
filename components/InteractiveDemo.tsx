@@ -10,10 +10,10 @@ function cn(...inputs: ClassValue[]) {
 }
 
 const mockData = [
-  { id: 'study', icon: Brain, label: 'Learning', color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', date: 'Oct 12', topic: 'React 3D', mood: 'Focused', prod: '90%', text: 'Mastered the basics of Three.js today. My spatial reasoning is improving.' },
-  { id: 'work', icon: Target, label: 'Goals', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', date: 'Oct 14', topic: 'Q4 Launch', mood: 'Determined', prod: '85%', text: 'Hit all milestone metrics for the new release. Feeling confident.' },
-  { id: 'health', icon: Activity, label: 'Health', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', date: 'Oct 15', topic: 'Recovery', mood: 'Tired', prod: '40%', text: 'Need to prioritize sleep. The resting heart rate metric was elevated.' },
-  { id: 'rest', icon: Moon, label: 'Rest', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', date: 'Oct 16', topic: 'Meditation', mood: 'Calm', prod: 'N/A', text: 'Taking a complete day off screens. The mind needs empty space to create.' },
+  { id: 'study', icon: Brain, label: 'Learning', color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', date: 'Oct 12, 2026', topic: 'React 3D', mood: 'Focused', prod: '90%', text: 'Mastered the basics of Three.js today. My spatial reasoning is improving.' },
+  { id: 'work', icon: Target, label: 'Goals', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', date: 'Oct 14, 2026', topic: 'Q4 Launch', mood: 'Determined', prod: '85%', text: 'Hit all milestone metrics for the new release. Feeling confident.' },
+  { id: 'health', icon: Activity, label: 'Health', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', date: 'Oct 15, 2026', topic: 'Recovery', mood: 'Tired', prod: '40%', text: 'Need to prioritize sleep. The resting heart rate metric was elevated.' },
+  { id: 'rest', icon: Moon, label: 'Rest', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', date: 'Oct 16, 2026', topic: 'Meditation', mood: 'Calm', prod: 'N/A', text: 'Taking a complete day off screens. The mind needs empty space to create.' },
 ];
 
 export default function InteractiveDemo() {

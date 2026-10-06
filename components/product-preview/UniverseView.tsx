@@ -4,60 +4,98 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { SelectionState } from './AppShell';
+import { JournalEntry } from './DataViews';
 
 interface UniverseViewProps {
   selection: SelectionState;
   setSelection: (sel: SelectionState) => void;
   activeTab?: string;
   onInteract?: () => void;
+  entries?: JournalEntry[];
 }
 
-const CLUSTERS = [
-  { id: 'study', name: 'STUDY', color: '#4488ff', position: [-5, 0, -5] },
-  { id: 'productivity', name: 'PRODUCTIVITY', color: '#ff8844', position: [6, -2, 3] },
-  { id: 'stress', name: 'STRESS', color: '#ff4466', position: [-3, 5, 5] },
-  { id: 'goals', name: 'GOALS', color: '#aa44ff', position: [4, 3, -4] },
-  { id: 'reflection', name: 'REFLECTION', color: '#44ccaa', position: [0, -5, -3] },
-  { id: 'social', name: 'SOCIAL', color: '#ffcc44', position: [7, 2, 0] },
-];
+import { CLUSTERS, getClusterForMood, MOODS } from '../../lib/shared-constants';
 
-export default function UniverseView({ selection, setSelection, activeTab = 'universe', onInteract }: UniverseViewProps) {
+export default function UniverseView({ selection, setSelection, activeTab = 'universe', onInteract, entries }: UniverseViewProps) {
   return (
     <div className="absolute inset-0 cursor-grab active:cursor-grabbing pb-[260px] md:pb-0">
       <Canvas camera={{ position: [0, 2, 10], fov: 45 }}>
         <color attach="background" args={['#020306']} />
         <ambientLight intensity={0.4} />
-        <UniverseScene selection={selection} setSelection={setSelection} activeTab={activeTab} onInteract={onInteract} />
+        <UniverseScene selection={selection} setSelection={setSelection} activeTab={activeTab} onInteract={onInteract} entries={entries} />
       </Canvas>
+
+      {/* Mood Legend */}
+      <div className="absolute bottom-6 left-6 z-10 pointer-events-none flex flex-col gap-2 bg-[#020306]/80 p-3 rounded-xl border border-white/10 backdrop-blur-md">
+        <div className="text-[9px] font-mono tracking-widest uppercase text-white/50 mb-1">Moods</div>
+        {MOODS.map(mood => {
+          const clusterId = getClusterForMood(mood);
+          const cluster = CLUSTERS.find(c => c.id === clusterId);
+          return (
+            <div key={mood} className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.2)]" style={{ backgroundColor: cluster?.color }} />
+              <span className="text-[10px] font-mono uppercase text-white/80">{mood}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-function UniverseScene({ selection, setSelection, activeTab, onInteract }: UniverseViewProps) {
+function UniverseScene({ selection, setSelection, activeTab, onInteract, entries }: UniverseViewProps) {
   const controlsRef = useRef<any>(null);
   
   const stars = useMemo(() => {
     const s: any[] = [];
-    CLUSTERS.forEach(cluster => {
-      const numStars = 6 + Math.floor(Math.random() * 6);
-      for (let i = 0; i < numStars; i++) {
-        const radius = 1.5 + Math.random() * 2.5;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        const x = cluster.position[0] + radius * Math.sin(phi) * Math.cos(theta);
-        const y = cluster.position[1] + radius * Math.sin(phi) * Math.sin(theta);
-        const z = cluster.position[2] + radius * Math.cos(phi);
-        // hardcode one specific star so the journal link works nicely
-        const isMain = cluster.id === 'study' && i === 0;
-        s.push({ 
-          id: isMain ? 'study-star-0' : `${cluster.id}-star-${i}`, 
-          clusterId: cluster.id, 
-          position: [x, y, z] 
-        });
-      }
+    
+    if (!entries || entries.length === 0) {
+      CLUSTERS.forEach(cluster => {
+        const numStars = 6 + Math.floor(Math.random() * 6);
+        for (let i = 0; i < numStars; i++) {
+          const radius = 1.5 + Math.random() * 2.5;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          const x = cluster.position[0] + radius * Math.sin(phi) * Math.cos(theta);
+          const y = cluster.position[1] + radius * Math.sin(phi) * Math.sin(theta);
+          const z = cluster.position[2] + radius * Math.cos(phi);
+          s.push({ 
+            id: `demo-${cluster.id}-star-${i}`, 
+            clusterId: cluster.id, 
+            position: [x, y, z] 
+          });
+        }
+      });
+      return s;
+    }
+
+    entries.forEach((entry) => {
+      const clusterId = getClusterForMood(entry.mood);
+
+      const cluster = CLUSTERS.find(c => c.id === clusterId) || CLUSTERS[0];
+      
+      const hash = entry.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const random = (seed: number) => {
+        let x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+      };
+      
+      const radius = 1.5 + random(hash) * 2.5;
+      const theta = random(hash + 1) * Math.PI * 2;
+      const phi = Math.acos(2 * random(hash + 2) - 1);
+      const x = cluster.position[0] + radius * Math.sin(phi) * Math.cos(theta);
+      const y = cluster.position[1] + radius * Math.sin(phi) * Math.sin(theta);
+      const z = cluster.position[2] + radius * Math.cos(phi);
+
+      s.push({
+        id: entry.id,
+        clusterId: cluster.id,
+        position: [x, y, z]
+      });
     });
+    
     return s;
-  }, []);
+  }, [entries]);
 
   const particles = useMemo(() => {
     const pos = new Float32Array(400 * 3);
@@ -116,13 +154,13 @@ function UniverseScene({ selection, setSelection, activeTab, onInteract }: Unive
               <sphereGeometry args={[isSelected ? 2.5 : 2, 16, 16]} />
               <meshBasicMaterial color={cluster.color} transparent opacity={isSelected ? 0.06 : 0.02} blending={THREE.AdditiveBlending} depthWrite={false} />
             </mesh>
-            <Html center zIndexRange={[100,0]}>
+            <Html center position={[0, -2.8, 0]} zIndexRange={[100,0]}>
               <div 
-                className="font-mono text-[9px] tracking-[0.2em] transition-all cursor-pointer whitespace-nowrap"
+                className="font-mono text-[10px] tracking-[0.2em] transition-all cursor-pointer whitespace-nowrap"
                 style={{
-                  color: isSelected ? cluster.color : 'rgba(255,255,255,0.3)',
-                  textShadow: isSelected ? `0 0 10px ${cluster.color}` : 'none',
-                  transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                  color: isSelected ? cluster.color : 'rgba(255,255,255,0.7)',
+                  textShadow: isSelected ? `0 0 15px ${cluster.color}` : '0 0 5px rgba(0,0,0,0.5)',
+                  transform: isSelected ? 'scale(1.15)' : 'scale(1)',
                 }}
                 onClick={(e) => { e.stopPropagation(); setSelection({ type: 'cluster', id: cluster.id }); onInteract?.(); }}
               >
@@ -138,20 +176,26 @@ function UniverseScene({ selection, setSelection, activeTab, onInteract }: Unive
         const color = cluster?.color || '#ffffff';
         const isSelected = selection.id === star.id;
         const isClusterSelected = selection.id === star.clusterId;
-        const opacity = isSelected ? 1 : (isClusterSelected ? 0.8 : 0.4);
+        const opacity = isSelected ? 1 : (isClusterSelected ? 0.9 : 0.6);
         
         return (
-          <mesh 
-            key={star.id} 
-            position={star.position as [number,number,number]}
-            scale={isSelected ? 1.5 : 1}
-            onClick={(e) => { e.stopPropagation(); setSelection({ type: 'star', id: star.id }); onInteract?.(); }}
-            onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
-            onPointerOut={() => { document.body.style.cursor = 'auto'; }}
-          >
-            <sphereGeometry args={[0.06, 16, 16]} />
-            <meshBasicMaterial color={color} transparent opacity={opacity} />
-          </mesh>
+          <group key={star.id} position={star.position as [number,number,number]}>
+            <mesh 
+              scale={isSelected ? 1.5 : 1}
+              onClick={(e) => { e.stopPropagation(); setSelection({ type: 'star', id: star.id }); onInteract?.(); }}
+              onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+              onPointerOut={() => { document.body.style.cursor = 'auto'; }}
+            >
+              <sphereGeometry args={[0.08, 16, 16]} />
+              <meshBasicMaterial color={color} transparent opacity={opacity} />
+            </mesh>
+            {isSelected && (
+              <mesh>
+                <sphereGeometry args={[0.18, 16, 16]} />
+                <meshBasicMaterial color={color} transparent opacity={0.4} blending={THREE.AdditiveBlending} depthWrite={false} />
+              </mesh>
+            )}
+          </group>
         );
       })}
     </>

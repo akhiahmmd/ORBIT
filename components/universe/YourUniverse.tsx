@@ -174,7 +174,7 @@ export default function YourUniverse() {
             Drag to rotate &bull; Click to explore
           </span>
           <span className="inline-block font-mono text-[9px] tracking-[0.2em] uppercase text-indigo-300/80 bg-indigo-900/30 px-3 py-1.5 rounded border border-indigo-500/20 backdrop-blur-md">
-            Live Connection Active
+            LOCAL DATA
           </span>
         </div>
 

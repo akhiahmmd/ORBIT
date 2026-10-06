@@ -2,9 +2,9 @@
 import { motion } from 'framer-motion';
 
 const stats = [
-  { label: 'DAYS', value: '31' },
-  { label: 'ENTRIES', value: '146' },
-  { label: 'PATTERNS', value: '18' },
+  { label: 'DEMO DAYS', value: '12' },
+  { label: 'DEMO ENTRIES', value: '12' },
+  { label: 'PATTERNS', value: '6' },
   { label: 'CLUSTERS', value: '6' },
 ];
 

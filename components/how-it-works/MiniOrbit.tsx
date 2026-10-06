@@ -88,7 +88,7 @@ export default function MiniOrbit({ onExploreFull }: MiniOrbitProps) {
               <div className="p-4">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-mono text-[9px] tracking-[0.25em] uppercase" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                    AUG 15, 2026
+                    Aug 15, 2026
                   </span>
                 </div>
                 <h4 className="font-serif mb-3" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.92)' }}>
@@ -134,7 +134,7 @@ export default function MiniOrbit({ onExploreFull }: MiniOrbitProps) {
                   {hoveredId === 'study' || clickedId === 'study' ? 'Study & Code' : 'Productivity'}
                 </h4>
                 <div className="font-mono text-[10px] tracking-widest text-indigo-400">
-                  24 MOMENTS
+                  2 MOMENTS
                 </div>
                 {clickedId && (
                   <div className="mt-4 pt-4 border-t border-white/10 text-left">

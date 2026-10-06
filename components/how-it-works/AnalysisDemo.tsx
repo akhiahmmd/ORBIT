@@ -36,7 +36,7 @@ export default function AnalysisDemo({ onCreateMemory }: AnalysisDemoProps) {
 
         <div className="flex flex-col gap-4 relative z-10">
           <p className="font-serif text-[14px] text-slate-300 leading-relaxed">
-            Your frustration transformed into a breakthrough. This entry strongly aligns with your <span className="text-indigo-300">Skill Acquisition</span> cluster.
+            Your frustration transformed into a breakthrough. This entry strongly aligns with your <span className="text-indigo-300">Study</span> cluster.
           </p>
           
           <div className="flex flex-wrap gap-2 mt-1">
