@@ -21,7 +21,7 @@ function makeCoreSprite(): THREE.Texture {
   return t;
 }
 
-const CORE_COUNT  = 12000;
+const CORE_COUNT  = 30000; // Even more dense
 
 export default function CentralCore() {
   const coreRef  = useRef<THREE.Points>(null);
@@ -34,10 +34,10 @@ export default function CentralCore() {
     const c   = new THREE.Color();
 
     for (let i = 0; i < CORE_COUNT; i++) {
-      // Elongated along X axis
-      const radiusX = Math.pow(Math.random(), 2.0) * 8.0;
-      const radiusZ = Math.pow(Math.random(), 2.0) * 1.5;
-      const radiusY = Math.pow(Math.random(), 2.0) * 0.8;
+      // Massive dense center volume
+      const radiusX = Math.pow(Math.random(), 1.8) * 22.0;
+      const radiusZ = Math.pow(Math.random(), 1.8) * 8.0;
+      const radiusY = Math.pow(Math.random(), 2.0) * 4.0;
       
       const angle = Math.random() * Math.PI * 2;
       
@@ -49,13 +49,13 @@ export default function CentralCore() {
       pos[i * 3 + 1] = y;
       pos[i * 3 + 2] = z;
 
-      const distSq = (x*x/(8*8) + y*y + z*z/(1.5*1.5));
+      const distSq = (x*x/(22*22) + y*y/(4*4) + z*z/(8*8));
       const dist = Math.min(1.0, Math.sqrt(distSq));
       
-      // Extremely bright in the absolute center, fading to warm orange
-      const bright = (0.5 + Math.random() * 0.5) * Math.max(0, 1.0 - dist);
+      // Intense brightness
+      const bright = (1.0 + Math.random() * 1.5) * Math.max(0, 1.0 - dist);
       
-      c.setHSL(0.08, 0.7, bright * 1.5); // Warm gold/peach, blown out to white in center via bloom
+      c.setHSL(0.12, 0.8, bright * 1.8); // Brilliant gold/peach
       
       col[i * 3]     = c.r;
       col[i * 3 + 1] = c.g;
@@ -65,34 +65,34 @@ export default function CentralCore() {
   }, []);
 
   useFrame((_, d) => {
-    if (coreRef.current) coreRef.current.rotation.y -= d * 0.02; // Match galaxy rotation
+    if (coreRef.current) coreRef.current.rotation.y -= d * 0.015; // Match galaxy rotation
   });
 
   return (
     <group>
       {/* Intense elongated glow plane */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[1.8, 0.6, 1]}>
-        <planeGeometry args={[16, 16]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[4.5, 1.8, 1]}>
+        <planeGeometry args={[24, 24]} />
         <meshBasicMaterial
           map={tex}
           transparent
-          opacity={0.6}
+          opacity={0.8}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
-          color="#ffeedd"
+          color="#fff0e0"
         />
       </mesh>
       
       {/* Secondary crossed glow to create starburst */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[0.3, 1.5, 1]}>
-        <planeGeometry args={[16, 16]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[1.2, 4.0, 1]}>
+        <planeGeometry args={[24, 24]} />
         <meshBasicMaterial
           map={tex}
           transparent
-          opacity={0.4}
+          opacity={0.5}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
-          color="#ddeeff"
+          color="#e0f0ff"
         />
       </mesh>
 
@@ -106,7 +106,7 @@ export default function CentralCore() {
           vertexColors
           transparent
           opacity={1.0}
-          size={0.12}
+          size={0.6} // Massive core particles
           sizeAttenuation
           depthWrite={false}
           blending={THREE.AdditiveBlending}
@@ -117,8 +117,8 @@ export default function CentralCore() {
       </points>
 
       {/* Point lights for strong bloom pickup on surrounding particles */}
-      <pointLight position={[0, 0, 0]} intensity={6.0} color="#ffeedd" distance={35} />
-      <pointLight position={[0, 0, 0]} intensity={3.0} color="#a0c0ff" distance={60} />
+      <pointLight position={[0, 0, 0]} intensity={12.0} color="#ffeedd" distance={90} />
+      <pointLight position={[0, 0, 0]} intensity={6.0} color="#a0c0ff" distance={150} />
     </group>
   );
 }

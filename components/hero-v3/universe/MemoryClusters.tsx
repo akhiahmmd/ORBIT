@@ -18,17 +18,17 @@ export interface ClusterDef {
 
 export const CLUSTERS: ClusterDef[] = [
   // Social: Left, slightly up, purple
-  { id: 'social',      label: 'Social',      count: 31, color: '#f0e0f0', threeColor: 0x5a4a68, position: [-8.0,  3.0, -1.0], radius: 2.5 },
+  { id: 'social',      label: 'Social',      count: 31, color: '#f0e0f0', threeColor: 0x5a4a68, position: [-22.0,  6.0, -3.0], radius: 6.5 },
   // Stress: Middle-left, reddish brown
-  { id: 'stress',      label: 'Stress',      count: 18, color: '#f0d0d0', threeColor: 0x684040, position: [-3.5,  0.5,  2.0], radius: 2.8 },
+  { id: 'stress',      label: 'Stress',      count: 18, color: '#f0d0d0', threeColor: 0x684040, position: [-11.0,  2.0,  8.0], radius: 6.0 },
   // Reflection: Bottom center, very large, dark teal
-  { id: 'reflection',  label: 'Reflection',  count: 24, color: '#d0f0f0', threeColor: 0x2a454d, position: [ 2.0, -5.5,  4.0], radius: 4.5 },
+  { id: 'reflection',  label: 'Reflection',  count: 24, color: '#d0f0f0', threeColor: 0x2a454d, position: [ 8.0, -14.0, 15.0], radius: 11.5 },
   // Goals: Right, golden brown
-  { id: 'goals',       label: 'Goals',       count: 24, color: '#f0e8d0', threeColor: 0x6a561f, position: [ 8.5,  1.5, -2.0], radius: 3.2 },
+  { id: 'goals',       label: 'Goals',       count: 24, color: '#f0e8d0', threeColor: 0x6a561f, position: [ 24.0,  4.0, -5.0], radius: 7.5 },
   // Productivity: Top right, green
-  { id: 'productivity',label: 'Productivity',count: 29, color: '#d0f0e0', threeColor: 0x3a5646, position: [ 4.0,  4.5, -4.0], radius: 2.0 },
+  { id: 'productivity',label: 'Productivity',count: 29, color: '#d0f0e0', threeColor: 0x3a5646, position: [ 13.0, 11.0, -10.0], radius: 5.5 },
   // Study: Top center, blue-purple
-  { id: 'study',       label: 'Study',       count: 22, color: '#d0d0f0', threeColor: 0x4a4a68, position: [-1.0,  5.0, -3.0], radius: 1.8 },
+  { id: 'study',       label: 'Study',       count: 22, color: '#d0d0f0', threeColor: 0x4a4a68, position: [-3.0, 13.0, -8.0], radius: 4.5 },
 ];
 
 export const ClusterCtx = createContext<{

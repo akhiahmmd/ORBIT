@@ -58,7 +58,8 @@ function CustomDropdown({ value, options, onChange, placeholder, triggerClassNam
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: up ? 5 : -5 }}
             transition={{ duration: 0.15 }}
-            className={`absolute left-0 ${up ? 'bottom-full mb-2' : 'top-full mt-2'} min-w-full w-max bg-[#0a0c14] border border-white/10 rounded-lg shadow-xl overflow-hidden z-50 flex flex-col py-1`}
+            className={`absolute left-0 ${up ? 'bottom-full mb-2' : 'top-full mt-2'} min-w-full w-max bg-[#0a0c14] border border-white/10 rounded-lg shadow-xl overflow-y-auto max-h-60 custom-scrollbar z-50 flex flex-col py-1`}
+            onMouseDown={(e) => e.preventDefault()}
           >
             {options.map((opt: string, idx: number) => (
               <div
@@ -175,7 +176,7 @@ export function JournalView({
       </AnimatePresence>
       
       {/* Sticky Header & Composer */}
-      <div className="sticky -top-6 pt-6 -mx-6 px-6 md:-top-10 md:pt-10 md:-mx-10 md:px-10 z-30 pb-6 mb-2 bg-[#060810]/95 backdrop-blur-2xl border-b border-white/5 flex flex-col gap-6">
+      <div className="relative z-30 pb-6 mb-2 border-b border-white/5 flex flex-col gap-4">
         <div className="flex justify-between items-end">
           <h2 className="font-serif text-2xl text-white/90 tracking-wide">Journal</h2>
           <span className="font-mono text-[10px] tracking-[0.2em] text-white/30 uppercase">{entries.length} Entries</span>
@@ -213,7 +214,7 @@ export function JournalView({
           
           <textarea
              placeholder="What's on your mind?"
-             className="w-full bg-transparent text-white/90 px-5 py-2 font-serif text-[15px] leading-relaxed resize-none outline-none placeholder:text-white/20 min-h-[100px]"
+             className="w-full bg-transparent text-white/90 px-5 py-2 font-serif text-[15px] leading-relaxed resize-none outline-none placeholder:text-white/20 min-h-[72px]"
              value={entryText}
              onChange={(e) => setEntryText(e.target.value)}
           />
@@ -226,7 +227,7 @@ export function JournalView({
                  placeholder="How did it feel?"
                  triggerClassName="flex justify-between items-center bg-transparent border border-white/10 text-white/60 text-[11px] font-mono tracking-widest uppercase rounded px-3 py-1.5 outline-none hover:bg-white/5 cursor-pointer focus:border-indigo-500/50 transition-colors"
                  optionClassName="px-3 py-2 text-[11px] font-mono tracking-widest uppercase cursor-pointer transition-colors"
-                 up={false}
+                 up={true}
                />
              </div>
              <div className="flex gap-2 items-center">

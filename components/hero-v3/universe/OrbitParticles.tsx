@@ -9,11 +9,12 @@ function makeStarTex(): THREE.Texture {
   c.width = 64; c.height = 64;
   const ctx = c.getContext('2d')!;
   
-  // Create a soft glowing dot
+  // Create a soft glowing dot with a bright center
   const gr = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
   gr.addColorStop(0,    'rgba(255, 255, 255, 1)');
-  gr.addColorStop(0.15, 'rgba(255, 255, 255, 0.8)');
-  gr.addColorStop(0.3,  'rgba(255, 255, 255, 0.2)');
+  gr.addColorStop(0.1,  'rgba(255, 255, 255, 0.9)');
+  gr.addColorStop(0.3,  'rgba(255, 255, 255, 0.3)');
+  gr.addColorStop(0.7,  'rgba(255, 255, 255, 0.05)');
   gr.addColorStop(1,    'rgba(255, 255, 255, 0)');
   ctx.fillStyle = gr;
   ctx.fillRect(0, 0, 64, 64);
@@ -23,9 +24,9 @@ function makeStarTex(): THREE.Texture {
   return t;
 }
 
-const TOTAL_PARTICLES = 100000;
-const RADIUS_MAX = 35;
-const BRANCHES = 2; // Two main spiral arms
+const TOTAL_PARTICLES = 250000;
+const RADIUS_MAX = 90;
+const BRANCHES = 4; // Multiple arms for a dense, broad structure
 
 export default function OrbitParticles({ isMobile }: { isMobile: boolean }) {
   const ref = useRef<THREE.Points>(null);
@@ -40,35 +41,32 @@ export default function OrbitParticles({ isMobile }: { isMobile: boolean }) {
     const c   = new THREE.Color();
 
     for (let i = 0; i < count; i++) {
-      // 70% in spiral arms, 30% scattered dust
-      const isArm = Math.random() < 0.7;
+      // 80% in spiral arms, 20% scattered dust
+      const isArm = Math.random() < 0.8;
       
       let radius, angle;
       
       if (isArm) {
         // Spiral arm math
-        radius = Math.random() * RADIUS_MAX;
         const branchAngle = ((i % BRANCHES) / BRANCHES) * Math.PI * 2;
-        const spinAngle = radius * 0.35; // How tight the spiral is
         
         // Curve power: 1.0 is linear, < 1.0 means more particles near center
-        const curve = Math.pow(Math.random(), 1.5);
+        const curve = Math.pow(Math.random(), 1.6); // more density near core
         radius = curve * RADIUS_MAX;
         
-        // Random spread that widens as we get further from center
-        const randomX = Math.pow(Math.random(), 2) * (Math.random() < 0.5 ? 1 : -1) * 0.4 * (radius + 1);
-        const randomZ = Math.pow(Math.random(), 2) * (Math.random() < 0.5 ? 1 : -1) * 0.4 * (radius + 1);
+        // Tighter spread to make arms distinct
+        const randomX = Math.pow(Math.random(), 2) * (Math.random() < 0.5 ? 1 : -1) * 0.3 * (radius + 2);
+        const randomZ = Math.pow(Math.random(), 2) * (Math.random() < 0.5 ? 1 : -1) * 0.3 * (radius + 2);
         
-        angle = branchAngle + (radius * 0.35); // base angle
+        angle = branchAngle + (radius * 0.3); // moderate spiral wrap
         
         // Apply elliptical stretch to make it a "barred" spiral
-        // We stretch along X axis and squash along Z
-        const x = Math.cos(angle) * radius * 1.8 + randomX; // stretch X
-        const z = Math.sin(angle) * radius * 0.7 + randomZ; // squash Z
+        const x = Math.cos(angle) * radius * 1.6 + randomX; // stretch X
+        const z = Math.sin(angle) * radius * 0.9 + randomZ; // squash Z
         
-        // Y (vertical) spread - very thin disc
-        const ySpread = 0.15 + (1 - (radius / RADIUS_MAX)) * 0.4;
-        const y = (Math.random() - 0.5) * ySpread * radius * 0.5;
+        // Y (vertical) spread - thicker core, thin disc edges
+        const ySpread = 0.2 + (1 - (radius / RADIUS_MAX)) * 0.5;
+        const y = (Math.random() - 0.5) * ySpread * (radius * 0.5 + 1);
         
         pos[i * 3]     = x;
         pos[i * 3 + 1] = y;
@@ -76,12 +74,12 @@ export default function OrbitParticles({ isMobile }: { isMobile: boolean }) {
         
       } else {
         // Random background dust/haze filling the space
-        radius = Math.pow(Math.random(), 0.8) * RADIUS_MAX * 1.5;
+        radius = Math.pow(Math.random(), 0.9) * RADIUS_MAX * 1.4;
         angle = Math.random() * Math.PI * 2;
         
-        const x = Math.cos(angle) * radius * 1.8;
-        const z = Math.sin(angle) * radius * 0.7;
-        const y = (Math.random() - 0.5) * (radius * 0.3); // Thicker volume
+        const x = Math.cos(angle) * radius * 1.5;
+        const z = Math.sin(angle) * radius * 0.9;
+        const y = (Math.random() - 0.5) * (radius * 0.6 + 4); // Thicker volume
         
         pos[i * 3]     = x;
         pos[i * 3 + 1] = y;
@@ -92,43 +90,45 @@ export default function OrbitParticles({ isMobile }: { isMobile: boolean }) {
       const dist = Math.sqrt(pos[i*3]*pos[i*3] + pos[i*3+1]*pos[i*3+1] + pos[i*3+2]*pos[i*3+2]);
       const distFrac = Math.min(1.0, dist / RADIUS_MAX);
       
-      // Coloring based on reference:
-      // Inner is warm (peach/gold), mid is dusty white/pinkish, outer is deep blue/purple
+      // Coloring based on reference: Extremely bright!
       let bright = 0;
-      if (Math.random() < 0.02) {
-        bright = 0.8 + Math.random() * 0.4; // extremely bright highlight stars
-      } else if (Math.random() < 0.15) {
-        bright = 0.3 + Math.random() * 0.3; // medium stars
+      if (Math.random() < 0.05) {
+        bright = 2.0 + Math.random() * 1.5; // bloom highlight stars
+      } else if (Math.random() < 0.3) {
+        bright = 0.8 + Math.random() * 1.0; // medium bright stars
       } else {
-        bright = 0.05 + Math.random() * 0.1; // dim background dust
+        bright = 0.3 + Math.random() * 0.5; // base level particles
       }
       
-      // Fade out edge particles
-      bright *= Math.max(0, 1.0 - Math.pow(distFrac, 2));
+      // Fade out edge particles gently
+      bright *= Math.max(0, 1.0 - Math.pow(distFrac, 3.0));
 
-      // Color interpolation
-      if (distFrac < 0.2) {
-        // Core/Inner warm
-        c.setHSL(0.08, 0.6, bright); // Peach/Gold
-      } else if (distFrac < 0.5) {
+      // Color interpolation for atmospheric depth
+      if (distFrac < 0.25) {
+        // Core/Inner warm white to gold
+        c.setHSL(0.12, 0.4, bright * 1.2); 
+      } else if (distFrac < 0.6) {
         // Mid mix
         if (Math.random() < 0.4) {
-          c.setHSL(0.85, 0.4, bright); // Pinkish/Purple
+          c.setHSL(0.85, 0.5, bright); // Pinkish/Purple dust
+        } else if (Math.random() < 0.4) {
+          c.setHSL(0.12, 0.6, bright * 1.1);  // Orange/Peach
         } else {
-          c.setHSL(0.55, 0.2, bright); // Dusty blue-grey
+          c.setHSL(0.58, 0.4, bright); // Dusty blue
         }
       } else {
-        // Outer cold
-        c.setHSL(0.65, 0.5, bright * 0.8); // Deep blue
+        // Outer cold space
+        c.setHSL(0.62, 0.7, bright * 0.8); // Deep blue
       }
 
       col[i * 3]     = c.r;
       col[i * 3 + 1] = c.g;
       col[i * 3 + 2] = c.b;
 
-      // Sizes: closer to core = slightly larger, highlight stars = larger
-      let sizeBase = 0.03 + Math.random() * 0.04;
-      if (bright > 0.6) sizeBase *= 2.5; 
+      // Perspective-based sizing: larger highlight stars
+      let sizeBase = 0.12 + Math.random() * 0.15; // Much larger base size
+      if (bright > 1.5) sizeBase *= 2.5;
+      if (distFrac < 0.15) sizeBase *= 1.8; // Core stars massive
       sz[i] = sizeBase;
     }
 
@@ -137,7 +137,7 @@ export default function OrbitParticles({ isMobile }: { isMobile: boolean }) {
 
   useFrame((_, d) => {
     if (ref.current) {
-      ref.current.rotation.y -= d * 0.02; // Very slow rotation
+      ref.current.rotation.y -= d * 0.015; // Elegant slow rotation
     }
   });
 
@@ -148,13 +148,11 @@ export default function OrbitParticles({ isMobile }: { isMobile: boolean }) {
         <bufferAttribute attach="attributes-color"    args={[colors,    3]} />
         <bufferAttribute attach="attributes-size"     args={[sizes,     1]} />
       </bufferGeometry>
-      {/* We use a custom shader material to enable per-particle sizing based on the size attribute, 
-          which standard PointsMaterial handles if sizeAttenuation is true. */}
       <pointsMaterial
         vertexColors
         transparent
         opacity={1.0}
-        size={isMobile ? 0.04 : 0.05} // realistic tiny stars
+        size={isMobile ? 0.2 : 0.45} // Drastically increase size to make them visible and glowing
         sizeAttenuation
         depthWrite={false}
         blending={THREE.AdditiveBlending}
@@ -165,3 +163,4 @@ export default function OrbitParticles({ isMobile }: { isMobile: boolean }) {
     </points>
   );
 }
+

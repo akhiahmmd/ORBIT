@@ -62,7 +62,8 @@ export default function OrbitScene() {
           <SpaceCamera targetPosRef={targetPosRef} />
 
           {/* Postprocessing - Restrained but beautiful bloom */}
-          <EffectComposer enableNormalPass={false} multisampling={4}>
+          {/* STEP 2 TEST: EffectComposer commented out
+          <EffectComposer enableNormalPass={false} multisampling={0}>
             <Bloom
               intensity={0.65}
               luminanceThreshold={0.55}
@@ -71,6 +72,7 @@ export default function OrbitScene() {
             />
             <Vignette darkness={0.78} offset={0.3} />
           </EffectComposer>
+          */}
         </Suspense>
       </Canvas>
 
