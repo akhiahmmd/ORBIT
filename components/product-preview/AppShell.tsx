@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { Orbit, Compass, BookOpen, BarChart2, Target, Settings } from 'lucide-react';
 import { JournalView, InsightsView, GoalsView, ProfileView, JournalEntry } from './DataViews';
 import { EVENT_STARS } from '../orbit/DataStars';
-import { getClusterForMood, formatDate, Mood } from '../../lib/shared-constants';
+import { getClusterForMood, formatDate, Mood, CLUSTERS } from '../../lib/shared-constants';
 
 const UniverseView = dynamic(() => import('./UniverseView'), { ssr: false });
 
@@ -173,8 +173,15 @@ export default function AppShell() {
 
 function SelectionDetail({ selection, entries }: { selection: SelectionState, entries: JournalEntry[] }) {
   if (selection.type === 'cluster') {
-    const clusterName = selection.id === 'study' ? 'STUDY / LEARNING' : selection.id.toUpperCase();
-    const clusterEntries = entries.filter(e => getClusterForMood(e.mood) === selection.id);
+    const clusterName = selection.id === 'study' ? 'STUDY / LEARNING' : (selection.id ?? '').toUpperCase();
+    const clusterEntries = entries.filter(e => {
+      const aiCluster = e.analysis?.cluster?.toLowerCase?.();
+      const resolvedId =
+        aiCluster && CLUSTERS.find(c => c.id === aiCluster)
+          ? aiCluster
+          : getClusterForMood(e.mood);
+      return resolvedId === selection.id;
+    });
     const totalMemories = clusterEntries.length;
 
     return (
@@ -195,10 +202,13 @@ function SelectionDetail({ selection, entries }: { selection: SelectionState, en
   const entry = entries.find(e => e.id === selection.id);
   
   if (entry) {
-    const dateStr = formatDate(entry.date).toUpperCase();
+    const d = new Date(entry.date);
+    const dateStr = !isNaN(d.getTime())
+      ? `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`
+      : entry.date;
     return (
       <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500">
-        <div className="font-mono text-[10px] tracking-[0.2em] text-white/40 uppercase mb-2">{dateStr}</div>
+        <div className="font-mono text-[10px] tracking-[0.2em] text-white/40 mb-2">{dateStr}</div>
         <h3 className="font-serif text-lg text-white/90 mb-4">{entry.title || 'Untitled Memory'}</h3>
         
         <div className="flex gap-2 mb-6">

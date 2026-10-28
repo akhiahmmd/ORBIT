@@ -1,8 +1,9 @@
 'use client';
-import { useState, Suspense, useMemo } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MemoryEntry, SAMPLE_MEMORIES, FILTER_OPTIONS } from './UniverseData';
+import { Sparkles } from 'lucide-react';
+import { MemoryEntry, SAMPLE_MEMORIES, FILTER_OPTIONS, loadUniverseMemories } from './UniverseData';
 import UniverseScene from './UniverseScene';
 
 export default function YourUniverse() {
@@ -12,25 +13,48 @@ export default function YourUniverse() {
   const [hoveredMemoryId, setHoveredMemoryId] = useState<string | null>(null);
   const [activeMemory, setActiveMemory] = useState<MemoryEntry | null>(null);
 
+  const [memoriesData, setMemoriesData] = useState<{ memories: MemoryEntry[]; isDemoOnly: boolean }>({
+    memories: SAMPLE_MEMORIES,
+    isDemoOnly: true,
+  });
+
+  useEffect(() => {
+    const refresh = () => setMemoriesData(loadUniverseMemories());
+    refresh();
+    window.addEventListener('storage', refresh);
+    window.addEventListener('focus', refresh);
+    const interval = setInterval(refresh, 2000);
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('focus', refresh);
+      clearInterval(interval);
+    };
+  }, []);
+
   const filteredMemories = useMemo(() => {
-    let result = SAMPLE_MEMORIES;
+    let result = memoriesData.memories;
 
     if (activeMoodFilter !== 'All Moods') {
-      result = result.filter(m => m.mood === activeMoodFilter);
+      result = result.filter(m => m.mood.toLowerCase() === activeMoodFilter.toLowerCase());
     }
 
+    const now = new Date();
     if (activeTimeFilter === 'This Week') {
-      const oneWeekAgo = new Date('2026-09-25T00:00:00Z');
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      result = result.filter(m => new Date(m.date) >= oneWeekAgo); 
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      result = result.filter(m => {
+        const d = new Date(m.date);
+        return !isNaN(d.getTime()) && d >= oneWeekAgo;
+      });
     } else if (activeTimeFilter === 'This Month') {
-      const oneMonthAgo = new Date('2026-09-25T00:00:00Z');
-      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      result = result.filter(m => new Date(m.date) >= oneMonthAgo);
+      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      result = result.filter(m => {
+        const d = new Date(m.date);
+        return !isNaN(d.getTime()) && d >= oneMonthAgo;
+      });
     }
 
     return result;
-  }, [activeMoodFilter, activeTimeFilter]);
+  }, [memoriesData.memories, activeMoodFilter, activeTimeFilter]);
 
   const handleMemoryClick = (memory: MemoryEntry) => {
     if (activeMemory?.id === memory.id) {
@@ -77,14 +101,14 @@ export default function YourUniverse() {
           className="flex flex-col md:flex-row justify-center items-center gap-4 bg-[#0a0c10]/80 backdrop-blur-md border border-[#1e293b]/80 rounded-2xl px-5 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.5)] pointer-events-auto w-full max-w-3xl"
         >
           {/* Time Filter Group */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-[10px] uppercase tracking-widest text-slate-500 font-mono mr-2">Time</span>
             <div className="flex bg-[#141824] rounded-lg p-1 border border-[#1e293b]/60">
               {FILTER_OPTIONS.time.map(time => (
                 <button
                   key={time}
                   onClick={() => setActiveTimeFilter(time)}
-                  className={`px-3 py-1.5 rounded text-[11px] font-mono tracking-widest transition-all ${
+                  className={`px-3 py-1.5 rounded text-[11px] font-mono tracking-widest transition-all cursor-pointer ${
                     activeTimeFilter === time
                       ? 'bg-[#2a3655] text-indigo-100 shadow-sm'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-[#1a2133]'
@@ -98,23 +122,25 @@ export default function YourUniverse() {
 
           <div className="w-full md:w-px h-px md:h-6 bg-[#1e293b] hidden md:block" />
 
-          {/* Mood Filter Group */}
-          <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 md:pb-0 hide-scrollbar">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-mono mr-2">Mood</span>
-            <div className="flex bg-[#141824] rounded-lg p-1 border border-[#1e293b]/60 whitespace-nowrap">
-              {FILTER_OPTIONS.mood.map(mood => (
-                <button
-                  key={mood}
-                  onClick={() => setActiveMoodFilter(mood)}
-                  className={`px-3 py-1.5 rounded text-[11px] font-mono tracking-widest transition-all ${
-                    activeMoodFilter === mood
-                      ? 'bg-[#2a3655] text-indigo-100 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#1a2133]'
-                  }`}
-                >
-                  {mood}
-                </button>
-              ))}
+          {/* Mood Filter Group with horizontal scroll & subtle edge fade */}
+          <div className="flex items-center gap-2 max-w-full overflow-hidden w-full md:w-auto">
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-mono mr-2 flex-shrink-0">Mood</span>
+            <div className="relative overflow-hidden flex-1 max-w-full [mask-image:linear-gradient(to_right,black_calc(100%-24px),transparent)] md:[mask-image:none]">
+              <div className="flex bg-[#141824] rounded-lg p-1 border border-[#1e293b]/60 whitespace-nowrap overflow-x-auto no-scrollbar gap-1 py-0.5">
+                {FILTER_OPTIONS.mood.map(mood => (
+                  <button
+                    key={mood}
+                    onClick={() => setActiveMoodFilter(mood)}
+                    className={`px-3 py-1.5 rounded text-[11px] font-mono tracking-widest transition-all cursor-pointer flex-shrink-0 ${
+                      activeMoodFilter === mood
+                        ? 'bg-[#2a3655] text-indigo-100 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-[#1a2133]'
+                    }`}
+                  >
+                    {mood}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -123,6 +149,7 @@ export default function YourUniverse() {
       {/* Main Galaxy Area - Flex 1, properly spaced below controls */}
       <div className="relative flex-1 w-full min-h-[500px] z-10 cursor-grab active:cursor-grabbing">
         <Canvas
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
           camera={{ position: [0, 2, 12], fov: 45, near: 0.1, far: 150 }}
           gl={{ antialias: true, alpha: false }}
           dpr={[1, 1.5]}
@@ -148,10 +175,8 @@ export default function YourUniverse() {
               className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none"
             >
               <div className="bg-[#0a0c10]/90 backdrop-blur-xl border border-[#1e293b] rounded-2xl p-10 flex flex-col items-center text-center shadow-2xl pointer-events-auto max-w-sm">
-                <span className="text-indigo-400/50 mb-5 border border-indigo-500/20 rounded-full p-4 bg-indigo-500/5">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </svg>
+                <span className="text-indigo-400/50 mb-5 border border-indigo-500/20 rounded-full p-4 bg-indigo-500/5 flex items-center justify-center">
+                  <Sparkles size={32} strokeWidth={1.5} />
                 </span>
                 <h3 className="text-xl text-white font-serif mb-2">Space is empty here</h3>
                 <p className="text-[13px] text-slate-400 mb-6 leading-relaxed">
@@ -159,7 +184,7 @@ export default function YourUniverse() {
                 </p>
                 <button
                   onClick={resetFilters}
-                  className="px-6 py-2.5 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-mono tracking-widest uppercase hover:bg-indigo-600/30 transition-colors"
+                  className="px-6 py-2.5 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-mono tracking-widest uppercase hover:bg-indigo-600/30 transition-colors cursor-pointer"
                 >
                   Clear Filters
                 </button>
@@ -174,7 +199,7 @@ export default function YourUniverse() {
             Drag to rotate &bull; Click to explore
           </span>
           <span className="inline-block font-mono text-[9px] tracking-[0.2em] uppercase text-indigo-300/80 bg-indigo-900/30 px-3 py-1.5 rounded border border-indigo-500/20 backdrop-blur-md">
-            LOCAL DATA
+            {memoriesData.isDemoOnly ? 'DEMO DATA' : 'YOUR DATA + DEMO'}
           </span>
         </div>
 
@@ -205,7 +230,9 @@ export default function YourUniverse() {
 
                 <div className="mb-6 pr-8">
                   <span className="font-mono text-[10px] tracking-widest uppercase text-indigo-400">
-                    {activeMemory.date}
+                    {!isNaN(new Date(activeMemory.date).getTime())
+                      ? new Date(activeMemory.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                      : activeMemory.date}
                   </span>
                   <h3 className="text-2xl font-serif text-slate-100 mt-2 leading-tight">
                     {activeMemory.title}

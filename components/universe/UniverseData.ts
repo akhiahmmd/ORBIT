@@ -1,12 +1,16 @@
+import { MOODS, Mood, getClusterForMood, CLUSTERS } from '../../lib/shared-constants';
+
 export interface MemoryEntry {
   id: string;
   date: string;
   title: string;
   excerpt: string;
-  mood: 'Joyful' | 'Reflective' | 'Anxious' | 'Focused' | 'Calm';
+  mood: string;
   tags: string[];
   position: [number, number, number]; // 3D space coordinates
   clusterId?: string;
+  opacity?: number;
+  isDemo?: boolean;
 }
 
 export const SAMPLE_MEMORIES: MemoryEntry[] = [
@@ -99,5 +103,86 @@ export const SAMPLE_MEMORIES: MemoryEntry[] = [
 
 export const FILTER_OPTIONS = {
   time: ['All Time', 'This Month', 'This Week'],
-  mood: ['All Moods', 'Joyful', 'Reflective', 'Focused', 'Calm', 'Anxious']
+  mood: ['All Moods', ...MOODS]
 };
+
+export function loadUniverseMemories(): { memories: MemoryEntry[]; isDemoOnly: boolean } {
+  if (typeof window === 'undefined') {
+    return { memories: SAMPLE_MEMORIES, isDemoOnly: true };
+  }
+
+  let rawEntries: any[] = [];
+  try {
+    const saved = localStorage.getItem('orbit_journal_entries_v2');
+    if (saved) {
+      rawEntries = JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Failed to parse orbit_journal_entries_v2', e);
+  }
+
+  const validEntries = Array.isArray(rawEntries)
+    ? rawEntries.filter(e => e && typeof e === 'object' && (e.text || e.title))
+    : [];
+
+  if (validEntries.length === 0) {
+    return { memories: SAMPLE_MEMORIES, isDemoOnly: true };
+  }
+
+  const realMemories: MemoryEntry[] = validEntries.map((entry, idx) => {
+    const aiCluster = entry.analysis?.cluster?.toLowerCase?.();
+    const clusterId =
+      aiCluster && CLUSTERS.some((c) => c.id === aiCluster)
+        ? aiCluster
+        : getClusterForMood(entry.mood as Mood);
+
+    const cluster = CLUSTERS.find(c => c.id === clusterId) || CLUSTERS[0];
+    const basePos = cluster.position;
+
+    const hash = (entry.id || String(idx))
+      .split('')
+      .reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+    const pseudoRandom = (seed: number) => {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    };
+
+    const radius = 0.8 + pseudoRandom(hash) * 1.6;
+    const theta = pseudoRandom(hash + 1) * Math.PI * 2;
+    const phi = Math.acos(2 * pseudoRandom(hash + 2) - 1);
+    const x = basePos[0] + radius * Math.sin(phi) * Math.cos(theta);
+    const y = basePos[1] + radius * Math.sin(phi) * Math.sin(theta);
+    const z = basePos[2] + radius * Math.cos(phi);
+
+    const title = entry.title?.trim() || 
+      (entry.text ? (entry.text.length > 25 ? entry.text.slice(0, 25) + '…' : entry.text) : 'Moment');
+
+    const tags = Array.isArray(entry.analysis?.themes) && entry.analysis.themes.length > 0
+      ? entry.analysis.themes
+      : [entry.mood || 'Reflection'];
+
+    return {
+      id: entry.id || `entry-${idx}`,
+      date: entry.date || new Date().toISOString(),
+      title,
+      excerpt: entry.text || '',
+      mood: entry.mood || 'Reflective',
+      tags,
+      position: [x, y, z],
+      clusterId,
+      opacity: 1.0,
+      isDemo: false,
+    };
+  });
+
+  const demoMemories: MemoryEntry[] = SAMPLE_MEMORIES.map(demo => ({
+    ...demo,
+    opacity: 0.4,
+    isDemo: true,
+  }));
+
+  return {
+    memories: [...realMemories, ...demoMemories],
+    isDemoOnly: false,
+  };
+}

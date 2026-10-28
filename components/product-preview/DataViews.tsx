@@ -1,7 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { MOODS, Mood, formatDate } from '../../lib/shared-constants';
+import { analyzeEntry } from '../../lib/ai/analyzeEntry';
+
+export interface EntryAnalysis {
+  status: 'pending' | 'done' | 'error';
+  cluster?: string;
+  mood?: string;
+  reflection?: string;
+  themes?: string[];
+  error?: string;
+}
 
 export interface JournalEntry {
   id: string;
@@ -10,6 +20,8 @@ export interface JournalEntry {
   mood: Mood;
   date: string;
   active?: boolean;
+  /** Optional AI analysis — old entries without this field keep working unchanged */
+  analysis?: EntryAnalysis;
 }
 
 function CustomDropdown({ value, options, onChange, placeholder, triggerClassName, optionClassName, up }: any) {
@@ -78,6 +90,17 @@ function CustomDropdown({ value, options, onChange, placeholder, triggerClassNam
   );
 }
 
+// ─── AI toggle helpers ────────────────────────────────────────────────────────
+const AI_LS_KEY = 'orbit_ai_enabled_v1';
+
+function readAiEnabled(): boolean {
+  try { return localStorage.getItem(AI_LS_KEY) === 'true'; } catch { return false; }
+}
+function writeAiEnabled(v: boolean) {
+  try { localStorage.setItem(AI_LS_KEY, String(v)); } catch {}
+}
+
+// ─── JournalView ─────────────────────────────────────────────────────────────
 export function JournalView({ 
   entries, 
   onEntriesChange, 
@@ -93,10 +116,66 @@ export function JournalView({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMood, setFilterMood] = useState<Mood | 'All'>('All');
   const [toast, setToast] = useState('');
-  
+  const [aiEnabled, setAiEnabled] = useState(false);
+
+  // Ref to always have the latest onEntriesChange without stale closure issues
+  const onEntriesChangeRef = useRef(onEntriesChange);
+  useEffect(() => { onEntriesChangeRef.current = onEntriesChange; }, [onEntriesChange]);
+
+  // Load AI toggle preference
+  useEffect(() => { setAiEnabled(readAiEnabled()); }, []);
+
+  // Stale-pending fix: any entry still 'pending' when the page loads gets
+  // converted to 'error' so the user sees a Retry button instead of a spinner
+  // that will never resolve.
+  useEffect(() => {
+    const hasPending = entries.some(e => e.analysis?.status === 'pending');
+    if (!hasPending) return;
+    const fixed = entries.map(e =>
+      e.analysis?.status === 'pending'
+        ? { ...e, analysis: { ...e.analysis, status: 'error' as const, error: 'STALE_PENDING' } }
+        : e
+    );
+    onEntriesChange(fixed);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run once on mount only
+
   // Edit & Delete State
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Shared helper: update a single entry by id using a functional update so we
+  // always patch the LATEST state, not the snapshot captured at call time.
+  const patchEntryById = (id: string, patch: Partial<JournalEntry>) => {
+    onEntriesChangeRef.current = onEntriesChangeRef.current; // keep ref fresh
+    // We can't call setEntries here (it lives in AppShell), so we ask
+    // AppShell to re-read from localStorage and merge. Instead, we use
+    // the functional-update pattern via onEntriesChange with a fresh read
+    // from localStorage to avoid the stale-closure problem.
+    const lsRaw = (() => { try { return localStorage.getItem('orbit_journal_entries_v2'); } catch { return null; } })();
+    const latest: JournalEntry[] = lsRaw ? JSON.parse(lsRaw) : [];
+    const next = latest.map(e => e.id === id ? { ...e, ...patch } : e);
+    onEntriesChangeRef.current(next);
+  };
+
+  const runAnalysis = async (entryId: string, text: string) => {
+    const result = await analyzeEntry(text);
+    if ('error' in result) {
+      patchEntryById(entryId, {
+        analysis: { status: 'error', error: result.error },
+      });
+    } else {
+      patchEntryById(entryId, {
+        analysis: {
+          status: 'done',
+          cluster: result.cluster,
+          mood: result.mood,
+          reflection: result.reflection,
+          themes: result.themes,
+        },
+      });
+    }
+  };
 
   const handleRecord = () => {
     if (!entryText.trim()) return;
@@ -104,23 +183,34 @@ export function JournalView({
     const finalMood = mood || 'Reflective';
     
     if (editingId) {
+      // On edit, strip any existing analysis so it's no longer stale
       const updated = entries.map(e => 
         e.id === editingId 
-          ? { ...e, title: entryTitle, text: entryText, mood: finalMood as Mood } 
+          ? { ...e, title: entryTitle, text: entryText, mood: finalMood as Mood, analysis: undefined } 
           : e
       );
       onEntriesChange(updated);
       setEditingId(null);
     } else {
+      const newId = Date.now().toString();
       const newEntry: JournalEntry = {
-        id: Date.now().toString(),
+        id: newId,
         title: entryTitle.trim(),
         text: entryText.trim(),
         mood: finalMood as Mood,
         date: new Date().toISOString(),
-        active: true
+        active: true,
+        // Set analysis.status immediately if AI is on, so the card shows 'pending'
+        ...(aiEnabled && { analysis: { status: 'pending' } }),
       };
+
+      // Save immediately — AI is optional and runs after
       onEntriesChange([newEntry, ...entries]);
+
+      // Fire AI in the background; patchEntryById reads fresh localStorage
+      if (aiEnabled) {
+        runAnalysis(newId, newEntry.text);
+      }
     }
     
     setEntryText('');
@@ -251,6 +341,32 @@ export function JournalView({
         </div>
       </div>
       
+      {/* AI Toggle */}
+      <div className="flex flex-col gap-1.5 pt-1">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[10px] tracking-widest uppercase text-white/40">AI Analysis</span>
+          <button
+            role="switch"
+            aria-checked={aiEnabled}
+            onClick={() => { const next = !aiEnabled; setAiEnabled(next); writeAiEnabled(next); }}
+            className={`relative w-9 h-5 rounded-full border transition-all duration-300 flex items-center cursor-pointer ${
+              aiEnabled
+                ? 'bg-indigo-500/30 border-indigo-500/60'
+                : 'bg-white/5 border-white/10'
+            }`}
+          >
+            <span className={`absolute w-3.5 h-3.5 rounded-full transition-all duration-300 ${
+              aiEnabled
+                ? 'left-[18px] bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]'
+                : 'left-[3px] bg-white/30'
+            }`} />
+          </button>
+        </div>
+        <p className="font-mono text-[9px] text-white/25 leading-snug">
+          When on, the text of new entries is sent to an AI service (Claude) to find patterns. Off by default.
+        </p>
+      </div>
+
       {/* Local Storage Disclaimer */}
       <div className="text-[10px] font-mono text-white/30 text-center tracking-wider">
         Entries are saved on this device only.
@@ -310,6 +426,16 @@ export function JournalView({
                   <div className="font-serif text-[15px] text-white/80 leading-relaxed mb-3 whitespace-pre-wrap">
                     {entryItem.text}
                   </div>
+                  {/* ── Analysis block ── */}
+                  <AnalysisBlock
+                    analysis={entryItem.analysis}
+                    entryId={entryItem.id}
+                    entryText={entryItem.text}
+                    onRetry={(id, text) => {
+                      patchEntryById(id, { analysis: { status: 'pending' } });
+                      runAnalysis(id, text);
+                    }}
+                  />
                 </>
               )}
 
@@ -329,6 +455,72 @@ export function JournalView({
           <div className="text-white/40 text-sm font-sans italic py-4">No entries found.</div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── AnalysisBlock — shown inside each entry card ─────────────────────────────
+function AnalysisBlock({
+  analysis,
+  entryId,
+  entryText,
+  onRetry,
+}: {
+  analysis?: EntryAnalysis;
+  entryId: string;
+  entryText: string;
+  onRetry: (id: string, text: string) => void;
+}) {
+  if (!analysis) return null;
+
+  if (analysis.status === 'pending') {
+    return (
+      <div className="mt-2 flex items-center gap-1.5 text-[10px] font-mono text-white/30 tracking-widest">
+        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400/50 animate-pulse" />
+        Analyzing…
+      </div>
+    );
+  }
+
+  if (analysis.status === 'error') {
+    const notConfigured = analysis.error === 'AI_NOT_CONFIGURED';
+    return (
+      <div className="mt-2 flex items-center gap-2">
+        <span className="text-[10px] font-mono text-white/25">
+          {notConfigured ? "AI isn't set up yet." : "Couldn't analyze."}
+        </span>
+        {!notConfigured && (
+          <button
+            onClick={() => onRetry(entryId, entryText)}
+            className="text-[10px] font-mono text-indigo-400/60 hover:text-indigo-300 underline underline-offset-2 cursor-pointer transition-colors"
+          >
+            Retry
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // status === 'done'
+  return (
+    <div className="mt-2 flex flex-col gap-1.5">
+      {analysis.reflection && (
+        <p className="font-serif italic text-[13px] text-white/40 leading-snug">
+          {analysis.reflection}
+        </p>
+      )}
+      {analysis.themes && analysis.themes.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {analysis.themes.map((t) => (
+            <span
+              key={t}
+              className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 font-mono text-[9px] tracking-widest text-indigo-300/60"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
